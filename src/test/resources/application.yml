@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:taskify;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+taskify:
+  datasource:
+    schema: public
+    pool:
+      max-size: 2
+      min-idle: 1
+      max-lifetime: PT5M

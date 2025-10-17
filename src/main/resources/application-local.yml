@@ -1,0 +1,23 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:postgresql://localhost:5432/taskify
+    username: taskify
+    password: taskify
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: false
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+taskify:
+  datasource:
+    pool:
+      max-size: 5
+      min-idle: 1

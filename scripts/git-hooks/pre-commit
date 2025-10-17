@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+JAVA_HOME="${JAVA_HOME:-}"
+
+if [[ -z "${JAVA_HOME}" ]]; then
+  echo "[pre-commit] JAVA_HOME is not set. Please export JAVA_HOME pointing to JDK 21." >&2
+  exit 1
+fi
+
+echo "[pre-commit] Running Spotless check..."
+"${PROJECT_ROOT}/mvnw" spotless:check
+
+echo "[pre-commit] Running unit tests..."
+"${PROJECT_ROOT}/mvnw" -DskipITs test
+
+echo "[pre-commit] Pre-commit checks completed successfully."

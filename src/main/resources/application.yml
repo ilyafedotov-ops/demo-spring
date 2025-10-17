@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: taskify
+  main:
+    banner-mode: console
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/taskify}
+    username: ${SPRING_DATASOURCE_USERNAME:taskify}
+    password: ${SPRING_DATASOURCE_PASSWORD:taskify}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: true
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    connect-retries: 5
+    placeholders:
+      schema: ${TASKIFY_DB_SCHEMA:public}
+
+taskify:
+  datasource:
+    schema: ${TASKIFY_DB_SCHEMA:public}
+    pool:
+      max-size: ${TASKIFY_DB_POOL_MAX_SIZE:10}
+      min-idle: ${TASKIFY_DB_POOL_MIN_IDLE:2}
+      max-lifetime: ${TASKIFY_DB_POOL_MAX_LIFETIME:PT30M}
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    root: INFO
