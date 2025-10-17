@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":automergeDisabled"
+  ],
+  "timezone": "UTC",
+  "schedule": ["after 02:00 on monday"],
+  "packageRules": [
+    {
+      "matchManagers": ["maven"],
+      "groupName": "maven-dependencies",
+      "stabilityDays": 3
+    }
+  ]
+}

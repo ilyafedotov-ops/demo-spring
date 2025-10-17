@@ -1,0 +1,27 @@
+# Auto-commit configuration file
+# This file controls the behavior of the auto-commit scripts
+
+# Directories to monitor for changes
+MONITORED_DIRS=("src" "docs" "scripts" ".")
+
+# File patterns to exclude from monitoring
+EXCLUDE_PATTERNS=("*.tmp" "*.log" ".git/*" "target/*" "node_modules/*")
+
+# Commit message prefix
+AUTO_COMMIT_PREFIX="[auto-commit]"
+
+# Time in seconds to wait before committing after a change (for watch mode)
+DEBOUNCE_TIME=5
+
+# Time in seconds between checks (for polling mode)
+POLL_INTERVAL=30
+
+# Git configuration for auto-commits
+GIT_USER_NAME="Auto Commit"
+GIT_USER_EMAIL="auto-commit@example.com"
+
+# Whether to run tests before committing (true/false)
+RUN_TESTS_BEFORE_COMMIT=false
+
+# Whether to run code formatting before committing (true/false)
+RUN_FORMATTING_BEFORE_COMMIT=false

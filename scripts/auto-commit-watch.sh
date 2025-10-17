@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Configuration
-MONITORED_DIRS=("src" "docs" "scripts")
-EXCLUDE_PATTERNS=("*.tmp" "*.log" ".git/*" "target/*" "node_modules/*")
-AUTO_COMMIT_PREFIX="[auto-commit]"
-DEBOUNCE_TIME=5  # Seconds to wait before committing after a change
+# Load configuration from file if it exists
+CONFIG_FILE="$(dirname "${BASH_SOURCE[0]}")/../.auto-commit-config"
+if [[ -f "$CONFIG_FILE" ]]; then
+    source "$CONFIG_FILE"
+else
+    # Default configuration
+    MONITORED_DIRS=("src" "docs" "scripts")
+    EXCLUDE_PATTERNS=("*.tmp" "*.log" ".git/*" "target/*" "node_modules/*")
+    AUTO_COMMIT_PREFIX="[auto-commit]"
+    DEBOUNCE_TIME=5  # Seconds to wait before committing after a change
+fi
 
 # Colors for output
 RED='\033[0;31m'
@@ -194,10 +200,10 @@ monitor_changes() {
 
 # Function to run in fallback polling mode
 run_polling_mode() {
-    print_info "Running in polling mode (interval: 30s)"
+    print_info "Running in polling mode (interval: ${POLL_INTERVAL:-30}s)"
     while true; do
         commit_changes
-        sleep 30
+        sleep "${POLL_INTERVAL:-30}"
     done
 }
 
