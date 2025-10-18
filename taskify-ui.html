@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taskify API Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #10b981;
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .response {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .response.error {
+            background: #fee;
+            color: #c00;
+        }
+
+        .response.success {
+            background: #efe;
+            color: #060;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #667eea;
+        }
+
+        .loading.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Taskify API Tester</h1>
+            <p>Interactive interface for testing Taskify API endpoints</p>
+            <span class="status" id="status">Checking...</span>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>📋 List Tags</h2>
+                <button class="btn" onclick="listTags()">Get All Tags</button>
+                <div class="loading" id="loading-tags"></div>
+                <div class="response" id="response-tags"></div>
+            </div>
+
+            <div class="card">
+                <h2>➕ Create Tag</h2>
+                <div class="input-group">
+                    <label>Tag Name:</label>
+                    <input type="text" id="tag-name" placeholder="e.g., urgent">
+                </div>
+                <div class="input-group">
+                    <label>Color (hex):</label>
+                    <input type="text" id="tag-color" placeholder="e.g., #FF0000" value="#FF0000">
+                </div>
+                <button class="btn" onclick="createTag()">Create Tag</button>
+                <div class="loading" id="loading-create-tag"></div>
+                <div class="response" id="response-create-tag"></div>
+            </div>
+
+            <div class="card">
+                <h2>👥 List Users</h2>
+                <button class="btn" onclick="listUsers()">Get All Users</button>
+                <div class="loading" id="loading-users"></div>
+                <div class="response" id="response-users"></div>
+            </div>
+
+            <div class="card">
+                <h2>📁 List Projects</h2>
+                <button class="btn" onclick="listProjects()">Get All Projects</button>
+                <div class="loading" id="loading-projects"></div>
+                <div class="response" id="response-projects"></div>
+            </div>
+
+            <div class="card">
+                <h2>📊 Activity Log</h2>
+                <div class="input-group">
+                    <label>Limit (optional):</label>
+                    <input type="number" id="activity-limit" placeholder="e.g., 10" value="10">
+                </div>
+                <button class="btn" onclick="listActivity()">Get Activity</button>
+                <div class="loading" id="loading-activity"></div>
+                <div class="response" id="response-activity"></div>
+            </div>
+
+            <div class="card">
+                <h2>❤️ Health Check</h2>
+                <button class="btn" onclick="checkHealth()">Check Health</button>
+                <div class="loading" id="loading-health"></div>
+                <div class="response" id="response-health"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081';
+        const ACTOR_ID = '11111111-2222-3333-4444-555555555555';
+
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Actor-Id': ACTOR_ID
+                }
+            };
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            const response = await fetch(API_BASE + endpoint, options);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw { status: response.status, data };
+            }
+
+            return data;
+        }
+
+        function showLoading(id, show = true) {
+            const el = document.getElementById('loading-' + id);
+            if (show) {
+                el.textContent = '⏳ Loading...';
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        }
+
+        function showResponse(id, data, isError = false) {
+            const el = document.getElementById('response-' + id);
+            el.textContent = JSON.stringify(data, null, 2);
+            el.className = 'response ' + (isError ? 'error' : 'success');
+        }
+
+        async function listTags() {
+            showLoading('tags');
+            try {
+                const data = await apiCall('/api/tags');
+                showResponse('tags', data);
+            } catch (error) {
+                showResponse('tags', error, true);
+            } finally {
+                showLoading('tags', false);
+            }
+        }
+
+        async function createTag() {
+            const name = document.getElementById('tag-name').value;
+            const color = document.getElementById('tag-color').value;
+
+            if (!name || !color) {
+                showResponse('create-tag', { error: 'Please fill in all fields' }, true);
+                return;
+            }
+
+            showLoading('create-tag');
+            try {
+                const data = await apiCall('/api/tags', 'POST', { name, color });
+                showResponse('create-tag', data);
+                document.getElementById('tag-name').value = '';
+                listTags();
+            } catch (error) {
+                showResponse('create-tag', error, true);
+            } finally {
+                showLoading('create-tag', false);
+            }
+        }
+
+        async function listUsers() {
+            showLoading('users');
+            try {
+                const data = await apiCall('/api/users');
+                showResponse('users', data);
+            } catch (error) {
+                showResponse('users', error, true);
+            } finally {
+                showLoading('users', false);
+            }
+        }
+
+        async function listProjects() {
+            showLoading('projects');
+            try {
+                const data = await apiCall('/api/projects');
+                showResponse('projects', data);
+            } catch (error) {
+                showResponse('projects', error, true);
+            } finally {
+                showLoading('projects', false);
+            }
+        }
+
+        async function listActivity() {
+            const limit = document.getElementById('activity-limit').value;
+            const endpoint = limit ? `/api/activity?limit=${limit}` : '/api/activity';
+
+            showLoading('activity');
+            try {
+                const data = await apiCall(endpoint);
+                showResponse('activity', data);
+            } catch (error) {
+                showResponse('activity', error, true);
+            } finally {
+                showLoading('activity', false);
+            }
+        }
+
+        async function checkHealth() {
+            showLoading('health');
+            try {
+                const response = await fetch(API_BASE + '/actuator/health');
+                const data = await response.json();
+                showResponse('health', data);
+                updateStatus(data.status === 'UP');
+            } catch (error) {
+                showResponse('health', { error: error.message }, true);
+                updateStatus(false);
+            } finally {
+                showLoading('health', false);
+            }
+        }
+
+        function updateStatus(isUp) {
+            const statusEl = document.getElementById('status');
+            if (isUp) {
+                statusEl.textContent = '✓ Server Running';
+                statusEl.style.background = '#10b981';
+            } else {
+                statusEl.textContent = '✗ Server Down';
+                statusEl.style.background = '#ef4444';
+            }
+        }
+
+        checkHealth();
+    </script>
+</body>
+</html>
