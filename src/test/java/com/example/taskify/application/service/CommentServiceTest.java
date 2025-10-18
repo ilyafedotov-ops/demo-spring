@@ -153,11 +153,11 @@ class CommentServiceTest {
   @Test
   void deleteCommentWithNullActorThrows() {
     UUID commentId = UUID.randomUUID();
-    Comment existing = new Comment(commentId, TASK_ID, AUTHOR_ID, "body", NOW);
-    when(commentRepository.findById(commentId)).thenReturn(Optional.of(existing));
 
     assertThatThrownBy(() -> commentService.deleteComment(TASK_ID, commentId, null))
         .isInstanceOf(IllegalArgumentException.class);
+
+    verify(commentRepository, never()).findById(any());
   }
 
   @Test
