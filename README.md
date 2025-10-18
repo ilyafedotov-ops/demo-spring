@@ -101,6 +101,8 @@ chmod +x scripts/git-hooks/pre-commit
 - **Project Plan** – `docs/project-plan.md`
 - **Product Brief** – `docs/product-brief.md`
 - **Glossary** – `docs/glossary.md`
+- **Activity Log Guidelines** – `docs/activity-log.md`
 - **Architecture Decision Records** – `docs/adr/`
+- **Status** – `docs/status.md`
 
 Contributions are welcome—see `CONTRIBUTING.md` for guidance.

@@ -33,10 +33,19 @@
 - Task 3.7: Define domain events (e.g., `TaskStatusChangedEvent`, `CommentAddedEvent`) and publish from application services.
 - Task 3.8: Implement transactional event listeners persisting `ActivityLogEntity` records.
 
+## Iteration Backlog — Activity Logging & Tagging
+| ID | Task | Status | Notes |
+| --- | --- | --- | --- |
+| IB-01 | Harden activity logging across task/comment flows with consistent payload schema and `ActivityCodebook` references. | In Progress | Ensure create/update/status/assign actions populate deterministic keys; align with guidelines in [`docs/activity-log.md`](activity-log.md). |
+| IB-02 | Extend `TaskService` with tag attach/detach operations and route changes through `ActivityService`. | Not Started | Requires repository/tag lookup support; emit `ActivityCodebook.ACTION_TASK_TAGGED` and `..._UNTAGGED` once defined. |
+| IB-03 | Cover activity emission in service unit tests, asserting payload contents (e.g., `from`, `to`, null handling). | Not Started | Update `TaskServiceTest` and `CommentServiceTest` with argument captors for `ActivityService.record`. |
+| IB-04 | Refine `CommentService.deleteComment` to avoid double loads and return outcome flag for controller layer. | Completed | Repository now exposes `deleteReturning` helper; service returns boolean and records activity once per deletion. |
+| IB-05 | Capture activity logging usage guidelines in `docs/activity-log.md` and link from README. | Completed | Guidelines published, linked from README, and integration checklist added for service adoption. |
+
 ## Milestone 4 – Web & API Layer
 - Task 4.1: Define request/response DTOs for users, projects, tasks, comments, tags, and activity items.
 - Task 4.2: Configure MapStruct mappers between entities, domain models, and DTOs; add mapper tests.
-- Task 4.3: Implement REST controllers with CRUD endpoints, pagination, and filtering support per resource.
+- Task 4.3: Implement REST controllers with CRUD endpoints, pagination, and filtering support per resource. _(Tasks, projects, tags, comments, users, and activity feeds now expose read/write APIs with shared error handling.)_
 - Task 4.4: Add method-level security annotations (`@PreAuthorize`, ownership checks) on controller methods.
 - Task 4.5: Create global `@ControllerAdvice` handling validation errors, domain exceptions, and security exceptions with ProblemDetail.
 - Task 4.6: Integrate springdoc OpenAPI starter, customize title/description, and add JWT security scheme.
@@ -64,18 +73,18 @@
 ## Milestone 7 – Testing Strategy
 - Task 7.1: Create testing base classes and utility builders for domain entities and DTOs.
 - Task 7.2: Configure Mockito and AssertJ dependencies; set global test configuration (JUnit 5 extensions).
-- Task 7.3: Implement unit tests for domain services, security services, and utility classes with coverage >80%.
+- Task 7.3: Implement unit tests for domain services, security services, and utility classes with coverage >80%. _(Query services, `SecurityAuditorAware`, repository adapters, and mapper surfaces now have dedicated unit tests keeping the per-class gate above 70%.)_
 - Task 7.4: Author `@DataJpaTest` cases for repositories verifying queries and migrations.
 - Task 7.5: Add `@WebMvcTest` slices for controllers to validate validation rules and error responses.
 - Task 7.6: Integrate Testcontainers Postgres into integration tests; ensure Flyway migrations run on startup.
 - Task 7.7: Implement end-to-end API tests with MockMvc/RestAssured covering auth flows and task lifecycle.
-- Task 7.8: Publish coverage report artifacts in CI pipeline and fail build under threshold.
+- Task 7.8: Publish coverage report artifacts in CI pipeline and fail build under threshold. _(JaCoCo `verify` phase enforces a 70% class-level minimum with generated mappers excluded and `TaskifyApplication` explicitly whitelisted.)_
 
 ## Milestone 8 – DevOps & Delivery
-- Task 8.1: Build multi-stage Dockerfile using Spring Boot layered jar; validate image locally.
-- Task 8.2: Configure `layers.idx` customization if needed and document image layering strategy.
-- Task 8.3: Author GitHub Actions workflow covering linting, unit tests, integration tests, and Docker build push.
-- Task 8.4: Enable caching in CI (Maven, Docker layers) to speed up pipelines.
+- Task 8.1: Build multi-stage Dockerfile using Spring Boot layered jar; validate image locally. _(Dockerfile now stages the Maven build on Temurin JDK 21, copies the repackaged jar into a slim JRE runtime image, and runs as a non-root `taskify` user.)_
+- Task 8.2: Configure `layers.idx` customization if needed and document image layering strategy. _(Custom `BOOT-INF/layers.idx` separates dependencies, static assets, configuration files, and application classes to maximise Docker layer caching; README documents the approach.)_
+- Task 8.3: Author GitHub Actions workflow covering linting, unit tests, integration tests, and Docker build push. _(CI job now runs `mvnw verify`, enforces OpenAPI consistency, and builds/pushes GHCR tags on `main`.)_
+- Task 8.4: Enable caching in CI (Maven, Docker layers) to speed up pipelines. _(Actions use `actions/setup-java` Maven cache plus Buildx cache backed by `gha` storage.)_
 - Task 8.5: Integrate dependency scanning (OWASP Dependency Check/Snyk) and publish reports in CI.
 - Task 8.6: Configure static code analysis (SonarCloud or CodeQL) with gates aligned to success metrics.
 - Task 8.7: Provide deployment manifests (Kubernetes deployment/service, Docker Compose prod override) under `deploy/`.
