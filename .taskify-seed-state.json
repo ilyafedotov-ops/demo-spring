@@ -1,0 +1,178 @@
+{
+  "version": 1,
+  "tags": [
+    {
+      "id": "d315ffc9-8494-4a2a-b5f5-cfe009953d94",
+      "name": "Demo Critical"
+    },
+    {
+      "id": "c695b8c1-7b95-41cb-b6b6-598d3be0c87f",
+      "name": "Demo UX"
+    },
+    {
+      "id": "388f01d0-e0b8-4a31-8031-c7934a7a97b1",
+      "name": "Demo Backend"
+    }
+  ],
+  "projects": [
+    {
+      "id": "712c98a9-bb6b-4007-b94c-213d62c39425",
+      "name": "Project Atlas"
+    },
+    {
+      "id": "5ad3b7cb-c418-4d42-bc3a-7fb5e1b47a05",
+      "name": "Project Borealis"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "a908d9f9-c3d1-4aa9-99cc-42e8cc2a2827",
+      "projectId": "712c98a9-bb6b-4007-b94c-213d62c39425",
+      "title": "Atlas - Establish architecture runway"
+    },
+    {
+      "id": "99d031af-9c83-4922-8007-5de1dc2cb825",
+      "projectId": "712c98a9-bb6b-4007-b94c-213d62c39425",
+      "title": "Atlas - Platform access provisioning"
+    },
+    {
+      "id": "867df617-8a93-4786-abef-8165da9fddf0",
+      "projectId": "712c98a9-bb6b-4007-b94c-213d62c39425",
+      "title": "Atlas - Feature flag scaffolding"
+    },
+    {
+      "id": "8cdc031c-b96a-4156-b12e-3261ae4eedcb",
+      "projectId": "712c98a9-bb6b-4007-b94c-213d62c39425",
+      "title": "Atlas - Pilot feedback synthesis"
+    },
+    {
+      "id": "fcf481af-1b7d-4552-903e-d524ee1fa47a",
+      "projectId": "5ad3b7cb-c418-4d42-bc3a-7fb5e1b47a05",
+      "title": "Borealis - Requirements alignment"
+    },
+    {
+      "id": "2ca9285b-c905-4ddf-b956-cd3056a2599b",
+      "projectId": "5ad3b7cb-c418-4d42-bc3a-7fb5e1b47a05",
+      "title": "Borealis - Data pipeline spike"
+    },
+    {
+      "id": "cbac5a01-cf66-4199-9da3-25f521808912",
+      "projectId": "5ad3b7cb-c418-4d42-bc3a-7fb5e1b47a05",
+      "title": "Borealis - Dashboard wireframes"
+    },
+    {
+      "id": "0cdfb0e9-d6fc-4634-8e8d-1169665b6b0a",
+      "projectId": "5ad3b7cb-c418-4d42-bc3a-7fb5e1b47a05",
+      "title": "Borealis - Access control model"
+    }
+  ],
+  "task_tags": [
+    {
+      "taskId": "a908d9f9-c3d1-4aa9-99cc-42e8cc2a2827",
+      "tagId": "388f01d0-e0b8-4a31-8031-c7934a7a97b1"
+    },
+    {
+      "taskId": "99d031af-9c83-4922-8007-5de1dc2cb825",
+      "tagId": "c695b8c1-7b95-41cb-b6b6-598d3be0c87f"
+    },
+    {
+      "taskId": "867df617-8a93-4786-abef-8165da9fddf0",
+      "tagId": "388f01d0-e0b8-4a31-8031-c7934a7a97b1"
+    },
+    {
+      "taskId": "867df617-8a93-4786-abef-8165da9fddf0",
+      "tagId": "d315ffc9-8494-4a2a-b5f5-cfe009953d94"
+    },
+    {
+      "taskId": "8cdc031c-b96a-4156-b12e-3261ae4eedcb",
+      "tagId": "c695b8c1-7b95-41cb-b6b6-598d3be0c87f"
+    },
+    {
+      "taskId": "fcf481af-1b7d-4552-903e-d524ee1fa47a",
+      "tagId": "c695b8c1-7b95-41cb-b6b6-598d3be0c87f"
+    },
+    {
+      "taskId": "2ca9285b-c905-4ddf-b956-cd3056a2599b",
+      "tagId": "388f01d0-e0b8-4a31-8031-c7934a7a97b1"
+    },
+    {
+      "taskId": "2ca9285b-c905-4ddf-b956-cd3056a2599b",
+      "tagId": "d315ffc9-8494-4a2a-b5f5-cfe009953d94"
+    },
+    {
+      "taskId": "cbac5a01-cf66-4199-9da3-25f521808912",
+      "tagId": "c695b8c1-7b95-41cb-b6b6-598d3be0c87f"
+    },
+    {
+      "taskId": "0cdfb0e9-d6fc-4634-8e8d-1169665b6b0a",
+      "tagId": "388f01d0-e0b8-4a31-8031-c7934a7a97b1"
+    }
+  ],
+  "comments": [
+    {
+      "id": "0eafea4d-78d6-419a-a6fa-b7c66d97a7fd",
+      "taskId": "a908d9f9-c3d1-4aa9-99cc-42e8cc2a2827"
+    },
+    {
+      "id": "01d9393e-a1c9-4026-aa11-5c751d772256",
+      "taskId": "a908d9f9-c3d1-4aa9-99cc-42e8cc2a2827"
+    },
+    {
+      "id": "58eb00b4-3955-4371-8c07-0ff32f0c8576",
+      "taskId": "99d031af-9c83-4922-8007-5de1dc2cb825"
+    },
+    {
+      "id": "55c6070a-5d9c-4046-a9e3-7a541807c817",
+      "taskId": "99d031af-9c83-4922-8007-5de1dc2cb825"
+    },
+    {
+      "id": "b498d2f7-7199-4acb-9f6b-3995fc4e4f39",
+      "taskId": "867df617-8a93-4786-abef-8165da9fddf0"
+    },
+    {
+      "id": "43d06f5f-fbf8-4e58-9ecf-a7dac08f171e",
+      "taskId": "867df617-8a93-4786-abef-8165da9fddf0"
+    },
+    {
+      "id": "a4a34456-40d5-48fb-bbad-0a360d951975",
+      "taskId": "8cdc031c-b96a-4156-b12e-3261ae4eedcb"
+    },
+    {
+      "id": "70e79b16-e42d-4ac3-854c-0fa84aecc75c",
+      "taskId": "8cdc031c-b96a-4156-b12e-3261ae4eedcb"
+    },
+    {
+      "id": "dd81968d-5d4a-4b18-883c-13ff23d3c399",
+      "taskId": "fcf481af-1b7d-4552-903e-d524ee1fa47a"
+    },
+    {
+      "id": "0103e981-666c-465d-ba97-a866a2f450de",
+      "taskId": "fcf481af-1b7d-4552-903e-d524ee1fa47a"
+    },
+    {
+      "id": "5e40c3ed-19f5-4263-9dbe-b9a55b3e9d2b",
+      "taskId": "2ca9285b-c905-4ddf-b956-cd3056a2599b"
+    },
+    {
+      "id": "382ea20a-aa86-4787-b349-5b6fd8a9995d",
+      "taskId": "2ca9285b-c905-4ddf-b956-cd3056a2599b"
+    },
+    {
+      "id": "c60df082-803e-4f84-8fac-119a798d0fdd",
+      "taskId": "cbac5a01-cf66-4199-9da3-25f521808912"
+    },
+    {
+      "id": "c7fc3be1-148d-4035-85fa-1d1c8e88a09f",
+      "taskId": "cbac5a01-cf66-4199-9da3-25f521808912"
+    },
+    {
+      "id": "c156262a-a7d9-4138-a1c0-2a3ee31838df",
+      "taskId": "0cdfb0e9-d6fc-4634-8e8d-1169665b6b0a"
+    },
+    {
+      "id": "851c57b5-0247-48b9-84f7-715c6ab1fb57",
+      "taskId": "0cdfb0e9-d6fc-4634-8e8d-1169665b6b0a"
+    }
+  ],
+  "savedAt": "2025-10-18T09:42:11Z"
+}

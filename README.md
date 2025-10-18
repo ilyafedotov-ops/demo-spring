@@ -130,6 +130,46 @@ docker compose -f docker-compose.local.yml --env-file .env up -d
 - Access pgAdmin at `http://localhost:5050` using the credentials defined in `.env`.
 - Apply Flyway migrations automatically by starting the Spring Boot application (`./mvnw spring-boot:run`) or running `./mvnw flyway:migrate` once database credentials are reachable.
 
+### Sample Data Seeder
+Need a realistic dataset for demos or manual testing? A Python helper script can populate the API via public endpoints:
+
+1. **Provision at least one user** – the API does not expose user creation. Insert rows manually (pgAdmin or `psql`). Example using the local Docker container:
+   ```bash
+   docker exec taskify-postgres psql -U taskify -d taskify -c \
+     "INSERT INTO users (id, username, email, password_hash, role, status) \
+      VALUES ('11111111-2222-3333-4444-555555555555','demo.owner','owner@example.com','noop','ADMIN','ACTIVE') \
+      ON CONFLICT (id) DO NOTHING;"
+   docker exec taskify-postgres psql -U taskify -d taskify -c \
+     "INSERT INTO users (id, username, email, password_hash, role, status) \
+      VALUES ('22222222-3333-4444-5555-666666666666','demo.collab','collab@example.com','noop','TEAM_MEMBER','ACTIVE') \
+      ON CONFLICT (id) DO NOTHING;"
+   ```
+   Confirm with:
+   ```bash
+   curl -s -H "X-Actor-Id: 11111111-2222-3333-4444-555555555555" \
+     http://localhost:8081/api/users | jq
+   ```
+2. **Install dependencies** – requires Python 3.11+ and `requests`:
+   ```bash
+   python3 -m pip install --user requests
+   ```
+3. **Seed data**:
+   ```bash
+   python3 scripts/sample_data_generator.py \
+     --base-url http://localhost:8081 \
+     --actor-id 11111111-2222-3333-4444-555555555555 \
+     --owner-ids 11111111-2222-3333-4444-555555555555,22222222-3333-4444-5555-666666666666 \
+     --run create
+   ```
+   The script records created resource IDs in `.taskify-seed-state.json` and prints a summary.
+4. **Cleanup later** (optional):
+   ```bash
+   python3 scripts/sample_data_generator.py --run cleanup
+   ```
+   Cleanup relies solely on REST endpoints: comments deleted, tag attachments removed, tasks/projects transitioned to `CANCELLED`.
+
+Tip: After seeding, open the UI at `http://localhost:8081/` and run the Health tab diagnostics to verify each endpoint.
+
 ## Development Workflow
 1. Create a feature branch from `main`.
 2. Implement the change, updating docs/ADRs when architecture decisions shift.
