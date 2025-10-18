@@ -9,6 +9,22 @@ Taskify is a Spring Boot 3 demo application that showcases production-ready patt
 - Observability via Actuator, Micrometer, structured logging.
 - API documentation powered by springdoc OpenAPI.
 
+### HTTP Surface Snapshot
+| Resource | Endpoints | Notes |
+| --- | --- | --- |
+| Tasks | `POST /api/tasks`, `GET /api/tasks?projectId=...`, `GET /api/tasks/{id}`, `PUT /api/tasks/{id}`, `PATCH /api/tasks/{id}/status`, `PATCH /api/tasks/{id}/assignee`, `POST/DELETE /api/tasks/{id}/tags/{tagId}` | Requires `X-Actor-Id`; emits ProblemDetail (HTTP 400/404/409) via `ApiErrorHandler` on validation/domain failures. |
+| Projects | `POST /api/projects`, `GET /api/projects`, `GET /api/projects/{id}`, `PUT /api/projects/{id}`, `PATCH /api/projects/{id}/status`, `PATCH /api/projects/{id}/owner` | Owner reassignment validates user existence through `UserDirectory`. |
+| Tags | `POST /api/tags`, `GET /api/tags` | Duplicate names return HTTP 400 with ProblemDetail. |
+| Comments | `POST /api/tasks/{taskId}/comments`, `GET /api/tasks/{taskId}/comments`, `DELETE /api/tasks/{taskId}/comments/{commentId}` | Delete returns 404 when comment already removed. |
+| Users | `GET /api/users`, `GET /api/users/{id}` | Read-only directory responses include role/status metadata. |
+| Activity | `GET /api/activity?entityType=...&entityId=...`, `GET /api/activity?entityType=...&limit=N` | Provides entity-scoped or recent feed entries ordered by `occurredAt`. |
+
+All controllers rely on the shared `ActorResolver` for authentication header parsing and on `ApiErrorHandler` for translating `IllegalArgumentException`/`IllegalStateException` into RFC 7807 ProblemDetail payloads.
+
+### OpenAPI
+- The canonical specification lives at `docs/openapi.json` (authored alongside the controllers). Update it whenever endpoints, request bodies, or responses change.
+- `docs/openapi.html` embeds Swagger UI pointing at the local JSON for quick browsing—open the file directly in a browser or serve `docs/` via any static host.
+
 See `docs/project-plan.md` and the ADRs in `docs/adr/` for the detailed roadmap and decisions.
 
 ## Prerequisites
