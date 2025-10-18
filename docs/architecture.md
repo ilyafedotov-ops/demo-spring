@@ -40,7 +40,7 @@ graph TD
 - Spring MVC controllers expose REST endpoints for tasks, projects, tags, users, comments, and
   activity feeds.
 - MapStruct mappers convert between domain models and DTO records.
-- `ApiErrorHandler` translates exceptions into RFC‑7807 `ProblemDetail` payloads.
+- `ApiErrorHandler` translates domain-specific exceptions into RFC‑7807 `ProblemDetail` payloads (`IllegalArgumentException` → 400, `ResourceNotFoundException` → 404, `IllegalStateException` → 409).
 - `ActorResolver` centralises extraction of the authenticated actor ID from the Spring Security
   context.
 - Controllers are intentionally thin: they validate requests, invoke a single application service

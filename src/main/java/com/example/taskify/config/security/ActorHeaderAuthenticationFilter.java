@@ -17,13 +17,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class ActorHeaderAuthenticationFilter extends OncePerRequestFilter {
 
   public static final String ACTOR_HEADER = "X-Actor-Id";
-  private static final String API_PREFIX = "/api/";
+  private static final String API_PREFIX = "/api";
 
   @Override
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
-    if (!request.getRequestURI().startsWith(API_PREFIX)) {
+    String servletPath = request.getServletPath();
+    if (!servletPath.startsWith(API_PREFIX + "/") && !servletPath.equals(API_PREFIX)) {
       filterChain.doFilter(request, response);
       return;
     }

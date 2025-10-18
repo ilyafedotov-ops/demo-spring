@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import com.example.taskify.application.service.ProjectService;
 import com.example.taskify.config.security.SecurityConfig;
 import com.example.taskify.domain.project.Project;
@@ -101,7 +102,7 @@ class ProjectControllerTest {
 
   @Test
   void getProjectReturnsNotFoundWhenMissing() throws Exception {
-    doThrow(new IllegalArgumentException("Project not found"))
+    doThrow(new ResourceNotFoundException("Project not found"))
         .when(projectService)
         .getProject(PROJECT_ID);
 

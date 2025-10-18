@@ -1,6 +1,6 @@
 package com.example.taskify.web;
 
-import java.util.Locale;
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,7 @@ public class ApiErrorHandler {
 
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<ProblemDetail> handleIllegalArgument(IllegalArgumentException ex) {
-    HttpStatus status = deriveStatus(ex.getMessage());
+    HttpStatus status = HttpStatus.BAD_REQUEST;
     ProblemDetail body = ProblemDetail.forStatusAndDetail(status, detail(ex.getMessage()));
     return ResponseEntity.status(status).body(body);
   }
@@ -24,18 +24,11 @@ public class ApiErrorHandler {
     return ResponseEntity.status(status).body(body);
   }
 
-  private HttpStatus deriveStatus(String message) {
-    if (message == null) {
-      return HttpStatus.BAD_REQUEST;
-    }
-    String normalised = message.toLowerCase(Locale.ROOT);
-    if (normalised.contains("not found")) {
-      return HttpStatus.NOT_FOUND;
-    }
-    if (normalised.contains("does not exist")) {
-      return HttpStatus.NOT_FOUND;
-    }
-    return HttpStatus.BAD_REQUEST;
+  @ExceptionHandler(ResourceNotFoundException.class)
+  public ResponseEntity<ProblemDetail> handleNotFound(ResourceNotFoundException ex) {
+    HttpStatus status = HttpStatus.NOT_FOUND;
+    ProblemDetail body = ProblemDetail.forStatusAndDetail(status, detail(ex.getMessage()));
+    return ResponseEntity.status(status).body(body);
   }
 
   private String detail(String message) {

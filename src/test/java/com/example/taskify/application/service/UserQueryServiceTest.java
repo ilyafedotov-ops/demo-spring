@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import com.example.taskify.application.port.out.UserRepository;
 import com.example.taskify.domain.user.User;
 import com.example.taskify.domain.user.UserRole;
@@ -46,7 +47,7 @@ class UserQueryServiceTest {
     UUID userId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-    assertThatExceptionOfType(IllegalArgumentException.class)
+    assertThatExceptionOfType(ResourceNotFoundException.class)
         .isThrownBy(() -> service.getUser(userId))
         .withMessage("User not found");
   }

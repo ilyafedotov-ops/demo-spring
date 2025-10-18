@@ -28,11 +28,13 @@ public class TagService {
   public Tag createTag(String name, String color) {
     Assert.hasText(name, "name must not be blank");
     Assert.hasText(color, "color must not be blank");
-    if (tagRepository.existsByName(name)) {
+    String normalisedName = name.strip();
+    String normalisedColor = color.strip();
+    if (tagRepository.existsByName(normalisedName)) {
       throw new IllegalArgumentException("Tag with name already exists");
     }
     Instant now = clock.instant();
-    Tag tag = Tag.create(uuidSupplier.get(), name, color, now);
+    Tag tag = Tag.create(uuidSupplier.get(), normalisedName, normalisedColor, now);
     return tagRepository.save(tag);
   }
 

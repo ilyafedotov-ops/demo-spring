@@ -22,6 +22,27 @@ public class SecurityConfig {
 
   @Bean
   @Order(1)
+  public SecurityFilterChain actuatorSecurityFilterChain(
+      HttpSecurity http, ActorHeaderAuthenticationFilter actorHeaderAuthenticationFilter)
+      throws Exception {
+    http.securityMatcher("/actuator/**")
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(
+            authorize ->
+                authorize
+                    .requestMatchers("/actuator/health", "/actuator/info")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .addFilterBefore(
+            actorHeaderAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    return http.build();
+  }
+
+  @Bean
+  @Order(2)
   public SecurityFilterChain apiSecurityFilterChain(
       HttpSecurity http, ActorHeaderAuthenticationFilter actorHeaderAuthenticationFilter)
       throws Exception {
@@ -42,7 +63,7 @@ public class SecurityConfig {
   }
 
   @Bean
-  @Order(2)
+  @Order(3)
   public SecurityFilterChain documentationSecurityFilterChain(HttpSecurity http) throws Exception {
     http.securityMatcher("/**")
         .csrf(csrf -> csrf.disable())

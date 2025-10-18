@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import com.example.taskify.application.port.out.TagRepository;
 import com.example.taskify.application.port.out.TaskEventPublisher;
 import com.example.taskify.application.port.out.TaskRepository;
@@ -326,7 +327,7 @@ class TaskServiceTest {
     when(taskRepository.findById(TASK_ID)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> taskService.attachTag(TASK_ID, tagId, ACTOR_ID))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Task not found");
   }
 
@@ -349,7 +350,7 @@ class TaskServiceTest {
     when(tagRepository.findById(tagId)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> taskService.attachTag(TASK_ID, tagId, ACTOR_ID))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Tag not found");
   }
 
@@ -359,7 +360,7 @@ class TaskServiceTest {
     when(taskRepository.findById(TASK_ID)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> taskService.detachTag(TASK_ID, tagId, ACTOR_ID))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Task not found");
   }
 
@@ -382,7 +383,7 @@ class TaskServiceTest {
     when(tagRepository.findById(tagId)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> taskService.detachTag(TASK_ID, tagId, ACTOR_ID))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Tag not found");
   }
 
@@ -391,7 +392,7 @@ class TaskServiceTest {
     when(userDirectory.existsById(ACTOR_ID)).thenReturn(false);
 
     assertThatThrownBy(() -> taskService.assignTask(TASK_ID, ACTOR_ID, CREATOR_ID))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Assignee does not exist");
 
     verify(taskRepository, never()).findById(any());
@@ -548,7 +549,7 @@ class TaskServiceTest {
     when(taskRepository.findById(TASK_ID)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> taskService.getTask(TASK_ID))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Task not found");
   }
 

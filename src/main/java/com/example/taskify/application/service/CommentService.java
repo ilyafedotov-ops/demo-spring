@@ -1,5 +1,6 @@
 package com.example.taskify.application.service;
 
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import com.example.taskify.application.port.out.CommentRepository;
 import com.example.taskify.application.port.out.TaskRepository;
 import com.example.taskify.application.port.out.UserDirectory;
@@ -46,9 +47,9 @@ public class CommentService {
     Assert.hasText(body, "body must not be blank");
     taskRepository
         .findById(taskId)
-        .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+        .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
     if (!userDirectory.existsById(authorId)) {
-      throw new IllegalArgumentException("Author does not exist");
+      throw new ResourceNotFoundException("Author does not exist");
     }
     Comment comment =
         new Comment(uuidSupplier.get(), taskId, authorId, body.strip(), clock.instant());
@@ -71,12 +72,16 @@ public class CommentService {
   }
 
   @Transactional
-  public boolean deleteComment(UUID commentId, UUID actorId) {
+  public boolean deleteComment(UUID taskId, UUID commentId, UUID actorId) {
+    Assert.notNull(taskId, "taskId must not be null");
     Assert.notNull(commentId, "commentId must not be null");
+    Assert.notNull(actorId, "actorId must not be null");
     return commentRepository
-        .deleteReturning(commentId)
+        .findById(commentId)
+        .filter(existing -> existing.taskId().equals(taskId))
         .map(
             existing -> {
+              commentRepository.delete(commentId);
               Map<String, Object> payload = new LinkedHashMap<>();
               payload.put("taskId", existing.taskId());
               activityService.record(

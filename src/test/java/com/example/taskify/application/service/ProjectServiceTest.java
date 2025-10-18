@@ -7,6 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import com.example.taskify.application.port.out.ProjectEventPublisher;
 import com.example.taskify.application.port.out.ProjectRepository;
 import com.example.taskify.application.port.out.UserDirectory;
@@ -136,7 +137,7 @@ class ProjectServiceTest {
     when(userDirectory.existsById(newOwner)).thenReturn(false);
 
     assertThatThrownBy(() -> projectService.reassignOwner(PROJECT_ID, newOwner, ACTOR_ID))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Owner does not exist");
 
     verify(projectRepository, never()).findById(any());
@@ -157,7 +158,7 @@ class ProjectServiceTest {
                     null,
                     null,
                     CREATOR_ID))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Owner does not exist");
 
     verify(projectRepository, never()).save(any());
@@ -170,7 +171,7 @@ class ProjectServiceTest {
 
     assertThatThrownBy(
             () -> projectService.changeStatus(PROJECT_ID, ProjectStatus.ACTIVE, ACTOR_ID))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Project not found");
   }
 
@@ -232,7 +233,7 @@ class ProjectServiceTest {
     when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> projectService.getProject(PROJECT_ID))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Project not found");
   }
 

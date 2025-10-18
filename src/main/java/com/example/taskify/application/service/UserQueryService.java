@@ -1,5 +1,6 @@
 package com.example.taskify.application.service;
 
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import com.example.taskify.application.port.out.UserRepository;
 import com.example.taskify.domain.user.User;
 import java.util.List;
@@ -20,7 +21,7 @@ public class UserQueryService {
   public User getUser(UUID userId) {
     return userRepository
         .findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
   }
 
   @Transactional(readOnly = true)

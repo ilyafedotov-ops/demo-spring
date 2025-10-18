@@ -1,5 +1,6 @@
 package com.example.taskify.web;
 
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import com.example.taskify.application.service.CommentService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -53,9 +54,9 @@ public class CommentController {
   public ResponseEntity<Void> deleteComment(
       @PathVariable UUID taskId, @PathVariable UUID commentId, Authentication authentication) {
     UUID actorId = actorResolver.requireActor(authentication);
-    boolean removed = commentService.deleteComment(commentId, actorId);
+    boolean removed = commentService.deleteComment(taskId, commentId, actorId);
     if (!removed) {
-      throw new IllegalArgumentException("Comment not found");
+      throw new ResourceNotFoundException("Comment not found");
     }
     return ResponseEntity.noContent().build();
   }

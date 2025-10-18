@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import com.example.taskify.application.service.CommentService;
 import com.example.taskify.config.security.SecurityConfig;
 import com.example.taskify.domain.comment.Comment;
@@ -78,19 +79,19 @@ class CommentControllerTest {
 
   @Test
   void deleteCommentReturnsNoContent() throws Exception {
-    doReturn(true).when(commentService).deleteComment(COMMENT_ID, ACTOR_ID);
+    doReturn(true).when(commentService).deleteComment(TASK_ID, COMMENT_ID, ACTOR_ID);
 
     mockMvc
         .perform(
             authenticated(delete("/api/tasks/{taskId}/comments/{commentId}", TASK_ID, COMMENT_ID)))
         .andExpect(status().isNoContent());
 
-    verify(commentService).deleteComment(COMMENT_ID, ACTOR_ID);
+    verify(commentService).deleteComment(TASK_ID, COMMENT_ID, ACTOR_ID);
   }
 
   @Test
   void deleteCommentReturnsNotFoundWhenMissing() throws Exception {
-    doReturn(false).when(commentService).deleteComment(COMMENT_ID, ACTOR_ID);
+    doReturn(false).when(commentService).deleteComment(TASK_ID, COMMENT_ID, ACTOR_ID);
 
     mockMvc
         .perform(
@@ -101,7 +102,7 @@ class CommentControllerTest {
   @Test
   void addCommentReturnsBadRequestWhenTaskMissing() throws Exception {
     CommentCreateRequest request = new CommentCreateRequest("Great job!");
-    doThrow(new IllegalArgumentException("Task not found"))
+    doThrow(new ResourceNotFoundException("Task not found"))
         .when(commentService)
         .addComment(TASK_ID, ACTOR_ID, "Great job!");
 

@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import com.example.taskify.application.port.out.CommentRepository;
 import com.example.taskify.application.port.out.TaskRepository;
 import com.example.taskify.application.port.out.UserDirectory;
@@ -106,7 +106,7 @@ class CommentServiceTest {
     when(taskRepository.findById(TASK_ID)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> commentService.addComment(TASK_ID, AUTHOR_ID, "Body"))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Task not found");
   }
 
@@ -115,7 +115,7 @@ class CommentServiceTest {
     when(userDirectory.existsById(AUTHOR_ID)).thenReturn(false);
 
     assertThatThrownBy(() -> commentService.addComment(TASK_ID, AUTHOR_ID, "Body"))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Author does not exist");
   }
 
@@ -132,13 +132,13 @@ class CommentServiceTest {
     UUID commentId = UUID.randomUUID();
 
     Comment existing = new Comment(commentId, TASK_ID, AUTHOR_ID, "body", NOW);
-    when(commentRepository.deleteReturning(commentId)).thenReturn(Optional.of(existing));
+    when(commentRepository.findById(commentId)).thenReturn(Optional.of(existing));
     when(activityService.record(any(), any(), any(), any(), any())).thenAnswer(invocation -> null);
 
-    boolean deleted = commentService.deleteComment(commentId, AUTHOR_ID);
+    boolean deleted = commentService.deleteComment(TASK_ID, commentId, AUTHOR_ID);
 
     assertThat(deleted).isTrue();
-    verify(commentRepository).deleteReturning(commentId);
+    verify(commentRepository).delete(commentId);
     ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
     verify(activityService)
         .record(
@@ -151,35 +151,40 @@ class CommentServiceTest {
   }
 
   @Test
-  void deleteCommentWithNullActorStillRecords() {
+  void deleteCommentWithNullActorThrows() {
     UUID commentId = UUID.randomUUID();
     Comment existing = new Comment(commentId, TASK_ID, AUTHOR_ID, "body", NOW);
-    when(commentRepository.deleteReturning(commentId)).thenReturn(Optional.of(existing));
-    when(activityService.record(any(), any(), any(), any(), any())).thenAnswer(invocation -> null);
+    when(commentRepository.findById(commentId)).thenReturn(Optional.of(existing));
 
-    boolean deleted = commentService.deleteComment(commentId, null);
-
-    assertThat(deleted).isTrue();
-    ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
-    verify(activityService)
-        .record(
-            eq(ActivityCodebook.ENTITY_COMMENT),
-            eq(commentId),
-            isNull(),
-            eq(ActivityCodebook.ACTION_COMMENT_REMOVED),
-            payloadCaptor.capture());
-    assertThat(payloadCaptor.getValue()).containsEntry("taskId", TASK_ID);
+    assertThatThrownBy(() -> commentService.deleteComment(TASK_ID, commentId, null))
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
   void deleteCommentNotFoundSkipsActivity() {
     UUID commentId = UUID.randomUUID();
-    when(commentRepository.deleteReturning(commentId)).thenReturn(Optional.empty());
+    when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
-    boolean deleted = commentService.deleteComment(commentId, AUTHOR_ID);
+    boolean deleted = commentService.deleteComment(TASK_ID, commentId, AUTHOR_ID);
 
     assertThat(deleted).isFalse();
 
+    verify(commentRepository, never()).delete(commentId);
+    verify(activityService, never())
+        .record(any(), any(), any(), eq(ActivityCodebook.ACTION_COMMENT_REMOVED), any());
+  }
+
+  @Test
+  void deleteCommentWithTaskMismatchReturnsFalse() {
+    UUID commentId = UUID.randomUUID();
+    UUID otherTaskId = UUID.randomUUID();
+    Comment existing = new Comment(commentId, otherTaskId, AUTHOR_ID, "body", NOW);
+    when(commentRepository.findById(commentId)).thenReturn(Optional.of(existing));
+
+    boolean deleted = commentService.deleteComment(TASK_ID, commentId, AUTHOR_ID);
+
+    assertThat(deleted).isFalse();
+    verify(commentRepository, never()).delete(commentId);
     verify(activityService, never())
         .record(any(), any(), any(), eq(ActivityCodebook.ACTION_COMMENT_REMOVED), any());
   }

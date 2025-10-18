@@ -1,5 +1,6 @@
 package com.example.taskify.application.service;
 
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import com.example.taskify.application.port.out.ProjectEventPublisher;
 import com.example.taskify.application.port.out.ProjectRepository;
 import com.example.taskify.application.port.out.UserDirectory;
@@ -50,7 +51,7 @@ public class ProjectService {
     Assert.notNull(ownerId, "ownerId must not be null");
     Assert.notNull(creatorId, "creatorId must not be null");
     if (!userDirectory.existsById(ownerId)) {
-      throw new IllegalArgumentException("Owner does not exist");
+      throw new ResourceNotFoundException("Owner does not exist");
     }
     Project project =
         Project.create(
@@ -73,7 +74,7 @@ public class ProjectService {
     Project project =
         projectRepository
             .findById(projectId)
-            .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
     project.changeStatus(newStatus, actorId, this::now);
     Project persisted = projectRepository.save(project);
     eventPublisher.publish(persisted.drainEvents());
@@ -91,7 +92,7 @@ public class ProjectService {
     Project project =
         projectRepository
             .findById(projectId)
-            .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
     project.rename(name, description, actorId, this::now);
     project.schedule(start, end, actorId, this::now);
     Project persisted = projectRepository.save(project);
@@ -102,12 +103,12 @@ public class ProjectService {
   @Transactional
   public Project reassignOwner(UUID projectId, UUID newOwnerId, UUID actorId) {
     if (!userDirectory.existsById(newOwnerId)) {
-      throw new IllegalArgumentException("Owner does not exist");
+      throw new ResourceNotFoundException("Owner does not exist");
     }
     Project project =
         projectRepository
             .findById(projectId)
-            .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
     project.changeOwner(newOwnerId, actorId, this::now);
     Project persisted = projectRepository.save(project);
     eventPublisher.publish(persisted.drainEvents());
@@ -122,7 +123,7 @@ public class ProjectService {
   public Project getProject(UUID projectId) {
     return projectRepository
         .findById(projectId)
-        .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+        .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
   }
 
   @Transactional(readOnly = true)

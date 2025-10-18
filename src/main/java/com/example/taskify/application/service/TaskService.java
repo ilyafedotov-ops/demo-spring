@@ -1,5 +1,6 @@
 package com.example.taskify.application.service;
 
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import com.example.taskify.application.port.out.TagRepository;
 import com.example.taskify.application.port.out.TaskEventPublisher;
 import com.example.taskify.application.port.out.TaskRepository;
@@ -65,7 +66,7 @@ public class TaskService {
     Assert.notNull(projectId, "projectId must not be null");
     Assert.notNull(creatorId, "creatorId must not be null");
     if (assigneeId != null && !userDirectory.existsById(assigneeId)) {
-      throw new IllegalArgumentException("Assignee does not exist");
+      throw new ResourceNotFoundException("Assignee does not exist");
     }
     Task task =
         Task.create(
@@ -99,7 +100,7 @@ public class TaskService {
     Task task =
         taskRepository
             .findById(taskId)
-            .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
     TaskStatus previousStatus = task.getStatus();
     task.changeStatus(newStatus, actorId, this::now);
     Task persisted = taskRepository.save(task);
@@ -121,12 +122,12 @@ public class TaskService {
   @Transactional
   public Task assignTask(UUID taskId, UUID assigneeId, UUID actorId) {
     if (assigneeId != null && !userDirectory.existsById(assigneeId)) {
-      throw new IllegalArgumentException("Assignee does not exist");
+      throw new ResourceNotFoundException("Assignee does not exist");
     }
     Task task =
         taskRepository
             .findById(taskId)
-            .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
     UUID previousAssignee = task.getAssigneeId().orElse(null);
     task.assignTo(assigneeId, actorId, this::now);
     Task persisted = taskRepository.save(task);
@@ -157,7 +158,7 @@ public class TaskService {
     Task task =
         taskRepository
             .findById(taskId)
-            .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
     task.updateDetails(title, description, priority, dueDate, actorId, this::now);
     Task persisted = taskRepository.save(task);
     eventPublisher.publish(persisted.drainEvents());
@@ -186,11 +187,11 @@ public class TaskService {
     Task task =
         taskRepository
             .findById(taskId)
-            .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
     var tag =
         tagRepository
             .findById(tagId)
-            .orElseThrow(() -> new IllegalArgumentException("Tag not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Tag not found"));
     if (taskTagRepository.isTagAttached(task.getId(), tag.getId())) {
       return;
     }
@@ -215,11 +216,11 @@ public class TaskService {
     Task task =
         taskRepository
             .findById(taskId)
-            .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
     var tag =
         tagRepository
             .findById(tagId)
-            .orElseThrow(() -> new IllegalArgumentException("Tag not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Tag not found"));
     boolean removed = taskTagRepository.detach(task.getId(), tag.getId());
     if (!removed) {
       return;
@@ -240,7 +241,7 @@ public class TaskService {
   public Task getTask(UUID taskId) {
     return taskRepository
         .findById(taskId)
-        .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+        .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
   }
 
   @Transactional(readOnly = true)

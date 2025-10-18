@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import com.example.taskify.application.service.TaskService;
 import com.example.taskify.config.security.SecurityConfig;
 import com.example.taskify.domain.task.Task;
@@ -234,7 +235,7 @@ class TaskControllerTest {
   void assignTaskReturnsBadRequestWhenValidationFails() throws Exception {
     TaskAssignRequest request = new TaskAssignRequest(ASSIGNEE_ID);
 
-    doThrow(new IllegalArgumentException("Assignee does not exist"))
+    doThrow(new ResourceNotFoundException("Assignee does not exist"))
         .when(taskService)
         .assignTask(TASK_ID, ASSIGNEE_ID, ACTOR_ID);
 
@@ -276,7 +277,7 @@ class TaskControllerTest {
 
   @Test
   void attachTagReturnsNotFoundWhenServiceThrows() throws Exception {
-    doThrow(new IllegalArgumentException("Task not found"))
+    doThrow(new ResourceNotFoundException("Task not found"))
         .when(taskService)
         .attachTag(TASK_ID, TAG_ID, ACTOR_ID);
 
@@ -299,7 +300,7 @@ class TaskControllerTest {
 
   @Test
   void detachTagReturnsNotFoundWhenServiceThrows() throws Exception {
-    doThrow(new IllegalArgumentException("Tag not found"))
+    doThrow(new ResourceNotFoundException("Tag not found"))
         .when(taskService)
         .detachTag(TASK_ID, TAG_ID, ACTOR_ID);
 

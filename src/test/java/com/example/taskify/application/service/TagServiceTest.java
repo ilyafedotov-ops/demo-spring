@@ -54,9 +54,11 @@ class TagServiceTest {
   void createTagRejectsDuplicateNames() {
     when(tagRepository.existsByName("Infra")).thenReturn(true);
 
-    assertThatThrownBy(() -> tagService.createTag("Infra", "#111111"))
+    assertThatThrownBy(() -> tagService.createTag("  Infra  ", "  #111111  "))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("already exists");
+
+    verify(tagRepository).existsByName("Infra");
   }
 
   @Test

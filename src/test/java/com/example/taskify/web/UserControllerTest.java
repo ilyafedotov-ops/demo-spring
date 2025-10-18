@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.taskify.application.exception.ResourceNotFoundException;
 import com.example.taskify.application.service.UserQueryService;
 import com.example.taskify.config.security.SecurityConfig;
 import com.example.taskify.domain.user.User;
@@ -67,7 +68,9 @@ class UserControllerTest {
 
   @Test
   void getUserReturnsNotFoundWhenMissing() throws Exception {
-    doThrow(new IllegalArgumentException("User not found")).when(userQueryService).getUser(USER_ID);
+    doThrow(new ResourceNotFoundException("User not found"))
+        .when(userQueryService)
+        .getUser(USER_ID);
 
     mockMvc
         .perform(authenticated(get("/api/users/{userId}", USER_ID)))
