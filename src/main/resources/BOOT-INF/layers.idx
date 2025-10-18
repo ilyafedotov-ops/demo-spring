@@ -1,0 +1,18 @@
+- "dependencies":
+  - "BOOT-INF/lib/"
+- "spring-boot-loader":
+  - "org/"
+- "snapshot-dependencies":
+  - "BOOT-INF/lib/*SNAPSHOT"
+- "static":
+  - "BOOT-INF/classes/static/"
+  - "BOOT-INF/classes/public/"
+- "configuration":
+  - "BOOT-INF/classes/application.yml"
+  - "BOOT-INF/classes/application-*.yml"
+  - "BOOT-INF/classes/config/"
+- "application":
+  - "BOOT-INF/classes/"
+  - "BOOT-INF/classpath.idx"
+  - "BOOT-INF/layers.idx"
+  - "META-INF/"

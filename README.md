@@ -38,6 +38,31 @@ JAVA_HOME="$(pwd)/tools/jdk-21.0.8" ./mvnw spotless:apply
 JAVA_HOME="$(pwd)/tools/jdk-21.0.8" ./mvnw verify
 ```
 
+## Container Image
+The repository ships with a multi-stage `Dockerfile` that builds the Spring Boot fat jar and publishes a slim runtime image (Temurin JRE 21).
+
+```bash
+# Build (skips tests inside the container for speed)
+docker build -t taskify:latest .
+
+# Run with an in-memory database profile
+docker run --rm -p 8080:8080 \
+  -e SPRING_PROFILES_ACTIVE=local \
+  taskify:latest
+```
+
+Images honour `JAVA_OPTS`, letting you add flags (e.g. `-Xms256m -Xmx256m`) without editing the entrypoint.
+
+On merges to `main`, CI pushes an image to GitHub Container Registry under `ghcr.io/<owner>/<repo>` with branch- and SHA-based tags. To pull the latest mainline build:
+
+```bash
+docker login ghcr.io -u <github-username> -p <github-token>
+docker pull ghcr.io/<owner>/<repo>:main
+```
+
+### Layering Strategy
+`src/main/resources/BOOT-INF/layers.idx` customises the Spring Boot layering metadata so frequently changing resources (`static/`, configuration files) live in their own layers. That enables Docker layer caching to reuse the heavy dependency layer when iterating on code while still keeping configuration overrides inexpensive.
+
 ## Local Infrastructure
 - Copy `.env.sample` to `.env` and adjust credentials if necessary.
 - Start the local Postgres + pgAdmin stack:
