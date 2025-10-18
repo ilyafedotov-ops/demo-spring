@@ -46,7 +46,12 @@ it for higher environments.
    ```
    - Unit tests, integration tests (backed by Testcontainers), Spotless, SpotBugs, OWASP Dependency
      Check, and JaCoCo coverage run in the same lifecycle.
-   - JaCoCo enforces a minimum 70% instruction coverage per class (selective exclusions apply).
+   - JaCoCo enforces a minimum 70% instruction coverage per class (selective exclusions apply) and
+     produces HTML reports under `target/site/jacoco`.
+   - SpotBugs runs with `Max` effort and `High` threshold, causing the build to fail on critical
+     static-analysis findings.
+   - OWASP Dependency Check stores its cache under `target/dependency-check-data` (configurable in
+     `pom.xml`) to speed up repeat executions.
 
 ## Container Image
 
@@ -94,11 +99,22 @@ it for higher environments.
 | `SERVER_PORT` | HTTP port. | `8080` |
 | `JAVA_OPTS` | Additional JVM flags in Docker image. | *(empty)* |
 
+### Runtime Profiles
+
+- **`local`**: Enables verbose SQL logging (configurable), lower connection pool sizes, and disables
+  production-only integrations. Activate via `SPRING_PROFILES_ACTIVE=local`.
+- **`test`**: Applied automatically during integration tests; disables Flyway auto-run and configures
+  Testcontainers-friendly datasource overrides.
+- **`prod`**: Default profile that expects externally managed datasource credentials and keeps security
+  filters enabled for `/api/**`.
+
 ## Observability & Operations
 
 - Spring Boot Actuator exposes `/actuator/health` and `/actuator/info` without authentication.
 - Application logs use structured output; integrate with your log aggregation solution.
 - Consider enabling metrics export (Micrometer) and log shipping based on your deployment platform.
+  The default configuration already exposes `metrics` and `prometheus` endpoints once a registry is
+  plugged in.
 
 ## Promotion Checklist
 
@@ -110,3 +126,34 @@ it for higher environments.
    once implemented.
 6. Monitor health endpoints and logs during rollout.
 
+## CI/CD Overview
+
+- The GitHub Actions workflow (`.github/workflows/ci.yml`) executes on pushes and pull requests:
+  1. Checks out the repository and restores the OWASP dependency cache.
+  2. Installs Temurin JDK 21 with Maven dependency caching via `actions/setup-java`.
+  3. Runs `./mvnw -B verify`, enforcing tests, linting, coverage, SpotBugs, and dependency scanning.
+  4. Generates the OpenAPI spec using the `openapi` Maven profile and fails if `docs/openapi.json`
+     drifts from the generated output.
+  5. Uploads the OpenAPI artifact for review (visible in the Actions tab).
+  6. Builds the Docker image via Buildx; pushes to GHCR when the branch is `main`, leveraging cache
+     imports/exports for faster builds.
+- When introducing new deployment environments, reuse the image produced by CI to guarantee parity
+  between staging and production.
+
+## Secrets & Configuration Management
+
+- Avoid committing environment-specific secrets. Use secret stores (GitHub Actions secrets, Vault,
+  AWS/GCP secret managers, etc.) to inject runtime values securely.
+- Supply credentials (database, messaging, third-party APIs) via environment variables or encrypted,
+  mounted configuration files.
+- Rotate secrets regularly and audit CI logs to ensure no sensitive values are echoed during builds.
+
+## Scaling Considerations
+
+- The application is stateless; run multiple replicas behind a load balancer. Ensure each pod/task
+  sets `X-Actor-Id` headers appropriately for external clients until JWT integration is complete.
+- Tune connection pool sizes via `taskify.datasource.pool` properties to match database capacity.
+- Activity logging currently operates synchronously within request transactions; for extreme loads,
+  consider introducing asynchronous event processing (Spring listeners, messaging queues).
+- Monitor database indexes and query plans periodically—task tagging and activity feeds rely on the
+  provided indexes for performance.

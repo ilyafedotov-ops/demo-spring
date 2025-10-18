@@ -72,6 +72,28 @@ JAVA_HOME="$(pwd)/tools/jdk-21.0.8" ./mvnw spotless:apply
 JAVA_HOME="$(pwd)/tools/jdk-21.0.8" ./mvnw verify
 ```
 
+### Quick Smoke Test
+1. Start the application (`./mvnw spring-boot:run`) or run the Docker image.
+2. Create a sample project:
+   ```bash
+   curl -X POST http://localhost:8080/api/projects \
+     -H 'Content-Type: application/json' \
+     -H 'X-Actor-Id: 11111111-2222-3333-4444-555555555555' \
+     -d '{"name":"Demo","description":"Sample project","ownerId":"11111111-2222-3333-4444-555555555555"}'
+   ```
+3. Create a task in that project using the returned project ID. Verify the response, then fetch the
+   task list:
+   ```bash
+   curl -H 'X-Actor-Id: 11111111-2222-3333-4444-555555555555' \
+     "http://localhost:8080/api/tasks?projectId=<project-id>"
+   ```
+4. Inspect recent activity:
+   ```bash
+   curl -H 'X-Actor-Id: 11111111-2222-3333-4444-555555555555' \
+     "http://localhost:8080/api/activity?entityType=TASK&entityId=<task-id>"
+   ```
+   Each mutating action records an entry with a deterministic payload.
+
 ## Container Image
 The repository ships with a multi-stage `Dockerfile` that builds the Spring Boot fat jar and publishes a slim runtime image (Temurin JRE 21).
 
