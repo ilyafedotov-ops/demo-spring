@@ -106,7 +106,7 @@ chmod +x scripts/git-hooks/pre-commit
 
 ## Formatting & Quality Gates
 - Spotless + Google Java Format enforce style (`./mvnw spotless:apply` to fix).
-- JaCoCo coverage reports are generated during `./mvnw verify`.
+- JaCoCo enforces a minimum 70% instruction coverage per class during `./mvnw verify`; add unit tests or adjust exclusions before merging if the gate fails.
 - Additional linters and security scanners will be wired into CI (see `docs/project-plan.md` Milestone 8).
 
 ## Configuration
