@@ -5,9 +5,27 @@ Taskify is a Spring Boot 3 demo application that showcases production-ready patt
 ## Architecture Snapshot
 - Java 21, Spring Boot 3.5.x, layered per feature (`web`, `application`, `domain`, `infrastructure`).
 - Persistence with PostgreSQL (Flyway migrations, Spring Data JPA).
-- Security via Spring Security JWT (planned).
+- Security via header-based authentication (placeholder for future JWT integration).
 - Observability via Actuator, Micrometer, structured logging.
-- API documentation powered by springdoc OpenAPI.
+- API documentation powered by springdoc OpenAPI (`docs/openapi.json`).
+
+### System Overview
+```mermaid
+graph TD
+    Client["Client (UI, CLI, Tests)"]
+    Filter["Security Filter\nX-Actor-Id enforcement"]
+    Web["Web Controllers\n(REST + MapStruct)"]
+    Services["Application Services"]
+    Domain["Domain Model\nAggregates + Events"]
+    Ports["Outbound Ports\nRepositories, Event Publishers"]
+    Infra["Infrastructure Adapters\nJPA, Spring Events"]
+    DB[("PostgreSQL\nFlyway schema")]
+
+    Client -->|HTTP + X-Actor-Id| Filter --> Web --> Services --> Domain
+    Services --> Ports --> Infra --> DB
+    Infra --> Events["Activity Log / Events"]
+    Services --> Events
+```
 
 ### HTTP Surface Snapshot
 | Resource | Endpoints | Notes |
@@ -117,6 +135,9 @@ chmod +x scripts/git-hooks/pre-commit
 - **Project Plan** – `docs/project-plan.md`
 - **Product Brief** – `docs/product-brief.md`
 - **Glossary** – `docs/glossary.md`
+- **Architecture Overview** – `docs/architecture.md`
+- **API Reference** – `docs/api-reference.md`
+- **Deployment Guide** – `docs/deployment-guide.md`
 - **Activity Log Guidelines** – `docs/activity-log.md`
 - **Architecture Decision Records** – `docs/adr/`
 - **Status** – `docs/status.md`
