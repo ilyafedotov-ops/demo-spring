@@ -3,28 +3,41 @@
 Taskify is a Spring Boot 3 demo application that showcases production-ready patterns for a team task management backend: layered architecture, security, observability, CI/CD, and documentation. It powers personas such as team members, team leads, and auditors with APIs for projects, tasks, comments, tags, and activity tracking.
 
 ## Architecture Snapshot
-- Java 21, Spring Boot 3.5.x, layered per feature (`web`, `application`, `domain`, `infrastructure`).
-- Persistence with PostgreSQL (Flyway migrations, Spring Data JPA).
-- Security via header-based authentication (placeholder for future JWT integration).
-- Observability via Actuator, Micrometer, structured logging.
+- Java 21 with Spring Boot 3.5.3 (Web, Validation, Security, Data JPA) and feature-aligned layers (`web`, `application`, `domain`, `infrastructure`).
+- Persistence with PostgreSQL, Flyway-managed migrations, and Spring Data JPA adapters.
+- Security enforced by `ActorHeaderAuthenticationFilter`, requiring the `X-Actor-Id` header on `/api/**`.
+- DTO mapping with MapStruct; domain aggregates emit events that flow through Spring ApplicationEvents.
+- Observability provided by Spring Boot Actuator and Micrometer (Prometheus metrics endpoint).
 - API documentation powered by springdoc OpenAPI (`docs/openapi.json`).
+
+## Technology Stack
+| Area | Details |
+| --- | --- |
+| Language & Build | Java 21, Maven Wrapper |
+| Frameworks | Spring Boot 3.5.3 (Web, Security, Validation, Actuator) |
+| Persistence | PostgreSQL 16+, Flyway, Spring Data JPA |
+| Mapping | MapStruct 1.5.5.Final |
+| API Tooling | springdoc-openapi 2.6.0 |
+| Testing | JUnit 5, Mockito, Testcontainers (PostgreSQL 16.4) |
 
 ### System Overview
 ```mermaid
 graph TD
-    Client["Client (UI, CLI, Tests)"]
-    Filter["Security Filter\nX-Actor-Id enforcement"]
-    Web["Web Controllers\n(REST + MapStruct)"]
-    Services["Application Services"]
-    Domain["Domain Model\nAggregates + Events"]
-    Ports["Outbound Ports\nRepositories, Event Publishers"]
-    Infra["Infrastructure Adapters\nJPA, Spring Events"]
-    DB[("PostgreSQL\nFlyway schema")]
+    Client["Clients (UI, CLI, Tests)"]
+    Filter["ActorHeaderAuthenticationFilter\n(X-Actor-Id enforcement)"]
+    Web["REST Controllers\n+ MapStruct DTO mappers"]
+    App["Application Services\nTask/Project/Tag/Comment/User/Activity"]
+    Domain["Domain Model\nAggregates + Domain Events"]
+    Ports["Outbound Ports\nRepositories, Event Publishers, UserDirectory"]
+    Infra["Infrastructure Adapters\nSpring Data JPA, Activity Log, Event bridge"]
+    DB[("PostgreSQL\nFlyway-managed schema")]
+    Events["Spring ApplicationEvents"]
 
-    Client -->|HTTP + X-Actor-Id| Filter --> Web --> Services --> Domain
-    Services --> Ports --> Infra --> DB
-    Infra --> Events["Activity Log / Events"]
-    Services --> Events
+    Client -->|HTTP + X-Actor-Id| Filter --> Web --> App --> Domain
+    Domain -->|Domain events| App
+    App --> Ports --> Infra --> DB
+    App --> Events
+    Infra --> Events
 ```
 
 ### HTTP Surface Snapshot

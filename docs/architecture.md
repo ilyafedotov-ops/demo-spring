@@ -4,22 +4,32 @@ Taskify follows a classic hexagonal architecture that separates the HTTP layer, 
 services, domain model, and infrastructure adapters. The goal is to keep business rules independent
 from delivery mechanisms and persistence concerns.
 
+## Technology Stack
+- **Language & Build**: Java 21, Maven Wrapper
+- **Frameworks**: Spring Boot 3.5.3 (Web, Validation, Security, Actuator)
+- **Persistence**: PostgreSQL 16+, Flyway migrations, Spring Data JPA
+- **Mapping**: MapStruct 1.5.5.Final
+- **API Tooling**: springdoc-openapi 2.6.0
+- **Testing**: JUnit 5, Mockito, Testcontainers (PostgreSQL 16.4)
+
+## System Diagram
 ```mermaid
 graph TD
-    Client["Client (UI, API consumer)"]
-    Filter["Security Filter\nActorHeaderAuthenticationFilter"]
-    Web["Web Layer\n(Rest controllers + mappers)"]
-    App["Application Services\n(TaskService, ProjectService, etc.)"]
-    Domain["Domain Model\n(Task, Project, User, Events)"]
-    Ports["Outbound Ports\n(Repositories, Publishers, UserDirectory)"]
-    Infra["Infrastructure Adapters\n(JPA repositories, Spring events)"]
-    DB[("PostgreSQL\n(Flyway managed)")]
+    Client["Clients (UI, API consumers, tests)"]
+    Filter["ActorHeaderAuthenticationFilter\n(X-Actor-Id enforcement)"]
+    Web["Web Layer\nREST controllers + MapStruct mappers + ApiErrorHandler"]
+    App["Application Services\nTasks, Projects, Tags, Comments, Users, Activity"]
+    Domain["Domain Layer\nAggregates, Value Objects, Domain events"]
+    Ports["Outbound Ports\nRepositories, Event Publishers, UserDirectory"]
+    Infra["Infrastructure Adapters\nSpring Data JPA, DatabaseUserDirectory, Activity Log, Event bridge"]
+    DB[("PostgreSQL\nFlyway-managed schema")]
+    Events["Spring ApplicationEvents"]
 
-    Client -->|HTTP + X-Actor-Id| Filter --> Web
-    Web -->|DTO ↔ Domain| App --> Domain
+    Client -->|HTTP + X-Actor-Id| Filter --> Web --> App --> Domain
+    Domain -->|Domain events| App
     App --> Ports --> Infra --> DB
-    Infra --> Events["Spring ApplicationEvents"]
     App --> Events
+    Infra --> Events
 ```
 
 ### Component Responsibility Matrix
@@ -28,11 +38,11 @@ graph TD
 | --- | --- | --- |
 | `web` | Accept/validate HTTP requests, map DTOs, return JSON responses. | `TaskController`, `ApiErrorHandler`, `TaskMapper` |
 | `application.service` | Orchestrate use cases, enforce transactional boundaries, emit domain events/activity logs. | `TaskService`, `ProjectService`, `ActivityService` |
-| `application.port.out` | Contracts for persistence, directory lookups, and event publishing. | `TaskRepository`, `UserDirectory`, `TaskEventPublisher` |
+| `application.port.out` | Contracts for persistence, directory lookups, and event publishing. | `TaskRepository`, `ProjectRepository`, `TaskTagRepository`, `ActivityLogRepository`, `UserDirectory`, `TaskEventPublisher`, `ProjectEventPublisher` |
 | `domain` | Domain model with invariants, value objects, and domain events. | `Task`, `Project`, `TaskStatusChangedEvent` |
-| `infrastructure.persistence.jpa` | Spring Data JPA entities, mappers, and repositories implementing outbound ports. | `TaskJpaEntity`, `TaskRepositoryAdapter` |
+| `infrastructure.persistence.jpa` | Spring Data JPA entities, mappers, and repositories implementing outbound ports. | `TaskJpaEntity`, `ActivityLogRepositoryAdapter`, `DatabaseUserDirectory` |
 | `infrastructure.events` | Bridges domain events to Spring's event bus. | `SpringDomainEventPublisher` |
-| `config` | Spring configuration, beans, and OpenAPI metadata. | `PersistenceConfig`, `SecurityConfig`, `OpenApiConfig` |
+| `config` | Spring configuration, beans, and OpenAPI metadata. | `PersistenceConfig`, `SecurityConfig`, `OpenApiConfig`, `TaskifyPropertiesConfiguration` |
 
 ## Layer Breakdown
 
@@ -78,8 +88,10 @@ graph TD
 
 ### Infrastructure Layer (`src/main/java/com/example/taskify/infrastructure`)
 - Persistence adapters implement outbound ports using Spring Data JPA entities, mappers, and
-  repositories.
-- `SpringDomainEventPublisher` bridges domain events to Spring's `ApplicationEventPublisher`.
+  repositories (`TaskRepositoryAdapter`, `TaskTagRepositoryAdapter`, `ActivityLogRepositoryAdapter`,
+  `DatabaseUserDirectory`, etc.).
+- `SpringDomainEventPublisher` bridges domain events to Spring's `ApplicationEventPublisher`, keeping
+  consumers decoupled from the core domain.
 - JPA entities inherit from `AuditableJpaEntity`, mapping audit metadata produced by the domain
   aggregates.
 - Testcontainers-backed integration tests live under `src/test/java/com/example/taskify/infrastructure`
