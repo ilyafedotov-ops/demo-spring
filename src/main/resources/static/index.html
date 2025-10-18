@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taskify API Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #10b981;
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #e5e7eb;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #d1d5db;
+        }
+
+        .tab.active {
+            background: #4a5568;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #64748b;
+            padding-bottom: 10px;
+        }
+
+        .btn {
+            background: #4a5568;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #2d3748;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-small {
+            width: auto;
+            padding: 5px 15px;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .response {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .response.error {
+            background: #fee;
+            color: #c00;
+        }
+
+        .response.success {
+            background: #efe;
+            color: #060;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #4a5568;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 3px;
+        }
+
+        .diagnostics-summary {
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .diagnostics-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .button-row .btn {
+            width: auto;
+            flex: 1;
+            margin-top: 0;
+        }
+
+        .button-row .btn.btn-small {
+            flex: 0;
+            margin-top: 0;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        .diagnostics-list {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 360px;
+            overflow-y: auto;
+        }
+
+        .diagnostic-item {
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #94a3b8;
+            border-radius: 8px;
+            padding: 12px;
+            background: #f8fafc;
+        }
+
+        .diagnostic-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1f2937;
+        }
+
+        .diagnostic-meta {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .diagnostic-status {
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: #4a5568;
+        }
+
+        .diagnostic-body {
+            font-family: 'Courier New', monospace;
+            background: #ffffff;
+            border-radius: 6px;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            max-height: 200px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 12px;
+        }
+
+        .diagnostic-item.success {
+            border-left-color: #10b981;
+        }
+
+        .diagnostic-item.error {
+            border-left-color: #ef4444;
+        }
+
+        .diagnostic-item.skipped {
+            border-left-color: #fbbf24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Taskify API Tester</h1>
+            <p>Interactive interface for testing all Taskify API endpoints</p>
+            <span class="status" id="status">Checking...</span>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('projects')">Projects</button>
+            <button class="tab" onclick="switchTab('tasks')">Tasks</button>
+            <button class="tab" onclick="switchTab('comments')">Comments</button>
+            <button class="tab" onclick="switchTab('tags')">Tags</button>
+            <button class="tab" onclick="switchTab('users')">Users</button>
+            <button class="tab" onclick="switchTab('activity')">Activity</button>
+            <button class="tab" onclick="switchTab('health')">Health</button>
+        </div>
+
+        <!-- Projects Tab -->
+        <div id="tab-projects" class="tab-content active">
+            <div class="grid">
+                <div class="card">
+                    <h2>Create Project</h2>
+                    <div class="input-group">
+                        <label>Name:</label>
+                        <input type="text" id="project-name" placeholder="Project name">
+                    </div>
+                    <div class="input-group">
+                        <label>Description:</label>
+                        <textarea id="project-description" placeholder="Project description"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>Owner ID:</label>
+                        <input type="text" id="project-owner-id" placeholder="UUID" value="11111111-2222-3333-4444-555555555555">
+                    </div>
+                    <div class="input-group">
+                        <label>Status:</label>
+                        <select id="project-status">
+                            <option value="PLANNING">PLANNING</option>
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="ON_HOLD">ON_HOLD</option>
+                            <option value="COMPLETED">COMPLETED</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="createProject()">Create Project</button>
+                    <div class="loading" id="loading-create-project"></div>
+                    <div class="response" id="response-create-project"></div>
+                </div>
+
+                <div class="card">
+                    <h2>List Projects</h2>
+                    <button class="btn" onclick="listProjects()">Get All Projects</button>
+                    <div class="loading" id="loading-projects"></div>
+                    <div class="response" id="response-projects"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Get Project</h2>
+                    <div class="input-group">
+                        <label>Project ID:</label>
+                        <input type="text" id="get-project-id" placeholder="UUID">
+                    </div>
+                    <button class="btn" onclick="getProject()">Get Project</button>
+                    <div class="loading" id="loading-get-project"></div>
+                    <div class="response" id="response-get-project"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Update Project</h2>
+                    <div class="input-group">
+                        <label>Project ID:</label>
+                        <input type="text" id="update-project-id" placeholder="UUID">
+                    </div>
+                    <div class="input-group">
+                        <label>Name:</label>
+                        <input type="text" id="update-project-name" placeholder="New name">
+                    </div>
+                    <div class="input-group">
+                        <label>Description:</label>
+                        <textarea id="update-project-description" placeholder="New description"></textarea>
+                    </div>
+                    <button class="btn" onclick="updateProject()">Update Project</button>
+                    <div class="loading" id="loading-update-project"></div>
+                    <div class="response" id="response-update-project"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Update Project Status</h2>
+                    <div class="input-group">
+                        <label>Project ID:</label>
+                        <input type="text" id="project-status-id" placeholder="UUID">
+                    </div>
+                    <div class="input-group">
+                        <label>New Status:</label>
+                        <select id="project-new-status">
+                            <option value="PLANNING">PLANNING</option>
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="ON_HOLD">ON_HOLD</option>
+                            <option value="COMPLETED">COMPLETED</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="updateProjectStatus()">Update Status</button>
+                    <div class="loading" id="loading-project-status"></div>
+                    <div class="response" id="response-project-status"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Change Project Owner</h2>
+                    <div class="input-group">
+                        <label>Project ID:</label>
+                        <input type="text" id="project-owner-change-id" placeholder="UUID">
+                    </div>
+                    <div class="input-group">
+                        <label>New Owner ID:</label>
+                        <input type="text" id="project-new-owner-id" placeholder="UUID">
+                    </div>
+                    <button class="btn" onclick="changeProjectOwner()">Change Owner</button>
+                    <div class="loading" id="loading-project-owner"></div>
+                    <div class="response" id="response-project-owner"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Tab -->
+        <div id="tab-tasks" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2>Create Task</h2>
+                    <div class="input-group">
+                        <label>Project ID:</label>
+                        <input type="text" id="task-project-id" placeholder="UUID">
+                    </div>
+                    <div class="input-group">
+                        <label>Title:</label>
+                        <input type="text" id="task-title" placeholder="Task title">
+                    </div>
+                    <div class="input-group">
+                        <label>Description:</label>
+                        <textarea id="task-description" placeholder="Task description"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>Priority:</label>
+                        <select id="task-priority">
+                            <option value="LOW">LOW</option>
+                            <option value="MEDIUM">MEDIUM</option>
+                            <option value="HIGH">HIGH</option>
+                            <option value="URGENT">URGENT</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Status:</label>
+                        <select id="task-status">
+                            <option value="TODO">TODO</option>
+                            <option value="IN_PROGRESS">IN_PROGRESS</option>
+                            <option value="IN_REVIEW">IN_REVIEW</option>
+                            <option value="DONE">DONE</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Assignee ID (optional):</label>
+                        <input type="text" id="task-assignee-id" placeholder="UUID">
+                    </div>
+                    <button class="btn" onclick="createTask()">Create Task</button>
+                    <div class="loading" id="loading-create-task"></div>
+                    <div class="response" id="response-create-task"></div>
+                </div>
+
+                <div class="card">
+                    <h2>List Tasks</h2>
+                    <div class="input-group">
+                        <label>Project ID:</label>
+                        <input type="text" id="list-tasks-project-id" placeholder="UUID">
+                    </div>
+                    <button class="btn" onclick="listTasks()">Get Tasks</button>
+                    <div class="loading" id="loading-tasks"></div>
+                    <div class="response" id="response-tasks"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Get Task</h2>
+                    <div class="input-group">
+                        <label>Task ID:</label>
+                        <input type="text" id="get-task-id" placeholder="UUID">
+                    </div>
+                    <button class="btn" onclick="getTask()">Get Task</button>
+                    <div class="loading" id="loading-get-task"></div>
+                    <div class="response" id="response-get-task"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Update Task</h2>
+                    <div class="input-group">
+                        <label>Task ID:</label>
+                        <input type="text" id="update-task-id" placeholder="UUID">
+                    </div>
+                    <div class="input-group">
+                        <label>Title:</label>
+                        <input type="text" id="update-task-title" placeholder="New title">
+                    </div>
+                    <div class="input-group">
+                        <label>Description:</label>
+                        <textarea id="update-task-description" placeholder="New description"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>Priority:</label>
+                        <select id="update-task-priority">
+                            <option value="LOW">LOW</option>
+                            <option value="MEDIUM">MEDIUM</option>
+                            <option value="HIGH">HIGH</option>
+                            <option value="URGENT">URGENT</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="updateTask()">Update Task</button>
+                    <div class="loading" id="loading-update-task"></div>
+                    <div class="response" id="response-update-task"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Assign Task</h2>
+                    <div class="input-group">
+                        <label>Task ID:</label>
+                        <input type="text" id="assign-task-id" placeholder="UUID">
+                    </div>
+                    <div class="input-group">
+                        <label>Assignee ID:</label>
+                        <input type="text" id="assign-task-assignee-id" placeholder="UUID">
+                    </div>
+                    <button class="btn" onclick="assignTask()">Assign Task</button>
+                    <div class="loading" id="loading-assign-task"></div>
+                    <div class="response" id="response-assign-task"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Update Task Status</h2>
+                    <div class="input-group">
+                        <label>Task ID:</label>
+                        <input type="text" id="task-status-id" placeholder="UUID">
+                    </div>
+                    <div class="input-group">
+                        <label>New Status:</label>
+                        <select id="task-new-status">
+                            <option value="TODO">TODO</option>
+                            <option value="IN_PROGRESS">IN_PROGRESS</option>
+                            <option value="IN_REVIEW">IN_REVIEW</option>
+                            <option value="DONE">DONE</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="updateTaskStatus()">Update Status</button>
+                    <div class="loading" id="loading-task-status"></div>
+                    <div class="response" id="response-task-status"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Attach Tag to Task</h2>
+                    <div class="input-group">
+                        <label>Task ID:</label>
+                        <input type="text" id="attach-tag-task-id" placeholder="UUID">
+                    </div>
+                    <div class="input-group">
+                        <label>Tag ID:</label>
+                        <input type="text" id="attach-tag-id" placeholder="UUID">
+                    </div>
+                    <button class="btn" onclick="attachTag()">Attach Tag</button>
+                    <div class="loading" id="loading-attach-tag"></div>
+                    <div class="response" id="response-attach-tag"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Detach Tag from Task</h2>
+                    <div class="input-group">
+                        <label>Task ID:</label>
+                        <input type="text" id="detach-tag-task-id" placeholder="UUID">
+                    </div>
+                    <div class="input-group">
+                        <label>Tag ID:</label>
+                        <input type="text" id="detach-tag-id" placeholder="UUID">
+                    </div>
+                    <button class="btn" onclick="detachTag()">Detach Tag</button>
+                    <div class="loading" id="loading-detach-tag"></div>
+                    <div class="response" id="response-detach-tag"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments Tab -->
+        <div id="tab-comments" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2>Add Comment</h2>
+                    <div class="input-group">
+                        <label>Task ID:</label>
+                        <input type="text" id="comment-task-id" placeholder="UUID">
+                    </div>
+                    <div class="input-group">
+                        <label>Comment:</label>
+                        <textarea id="comment-body" placeholder="Write your comment here..."></textarea>
+                    </div>
+                    <button class="btn" onclick="createComment()">Add Comment</button>
+                    <div class="loading" id="loading-create-comment"></div>
+                    <div class="response" id="response-create-comment"></div>
+                </div>
+
+                <div class="card">
+                    <h2>List Comments</h2>
+                    <div class="input-group">
+                        <label>Task ID:</label>
+                        <input type="text" id="list-comments-task-id" placeholder="UUID">
+                    </div>
+                    <button class="btn" onclick="listComments()">Get Comments</button>
+                    <div class="loading" id="loading-comments"></div>
+                    <div class="response" id="response-comments"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Delete Comment</h2>
+                    <div class="input-group">
+                        <label>Task ID:</label>
+                        <input type="text" id="delete-comment-task-id" placeholder="UUID">
+                    </div>
+                    <div class="input-group">
+                        <label>Comment ID:</label>
+                        <input type="text" id="delete-comment-id" placeholder="UUID">
+                    </div>
+                    <button class="btn" onclick="deleteComment()">Delete Comment</button>
+                    <div class="loading" id="loading-delete-comment"></div>
+                    <div class="response" id="response-delete-comment"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tags Tab -->
+        <div id="tab-tags" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2>Create Tag</h2>
+                    <div class="input-group">
+                        <label>Tag Name:</label>
+                        <input type="text" id="tag-name" placeholder="e.g., urgent">
+                    </div>
+                    <div class="input-group">
+                        <label>Color (hex):</label>
+                        <input type="text" id="tag-color" placeholder="e.g., #FF0000" value="#FF0000">
+                    </div>
+                    <button class="btn" onclick="createTag()">Create Tag</button>
+                    <div class="loading" id="loading-create-tag"></div>
+                    <div class="response" id="response-create-tag"></div>
+                </div>
+
+                <div class="card">
+                    <h2>List Tags</h2>
+                    <button class="btn" onclick="listTags()">Get All Tags</button>
+                    <div class="loading" id="loading-tags"></div>
+                    <div class="response" id="response-tags"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="tab-users" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2>List Users</h2>
+                    <button class="btn" onclick="listUsers()">Get All Users</button>
+                    <div class="loading" id="loading-users"></div>
+                    <div class="response" id="response-users"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Get User</h2>
+                    <div class="input-group">
+                        <label>User ID:</label>
+                        <input type="text" id="get-user-id" placeholder="UUID">
+                    </div>
+                    <button class="btn" onclick="getUser()">Get User</button>
+                    <div class="loading" id="loading-get-user"></div>
+                    <div class="response" id="response-get-user"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Tab -->
+        <div id="tab-activity" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2>Activity Log</h2>
+                    <div class="input-group">
+                        <label>Entity Type:</label>
+                        <select id="activity-entity-type">
+                            <option value="TASK">TASK</option>
+                            <option value="PROJECT">PROJECT</option>
+                            <option value="COMMENT">COMMENT</option>
+                            <option value="TAG">TAG</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Entity ID (optional):</label>
+                        <input type="text" id="activity-entity-id" placeholder="UUID">
+                        <div class="hint">Leave empty to get all activity for the entity type</div>
+                    </div>
+                    <div class="input-group">
+                        <label>Limit:</label>
+                        <input type="number" id="activity-limit" placeholder="e.g., 20" value="20">
+                    </div>
+                    <button class="btn" onclick="listActivity()">Get Activity</button>
+                    <div class="loading" id="loading-activity"></div>
+                    <div class="response" id="response-activity"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Tab -->
+        <div id="tab-health" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2>Health Check</h2>
+                    <button class="btn" onclick="checkHealth()">Check Health</button>
+                    <div class="loading" id="loading-health"></div>
+                    <div class="response" id="response-health"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Full API Diagnostics</h2>
+                    <div class="hint">Runs each endpoint using the values currently entered in the other tabs.</div>
+                    <div class="diagnostics-controls">
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="diagnostics-include-writes">
+                                Include write operations (POST, PUT, PATCH, DELETE)
+                            </label>
+                            <div class="hint">Ensure identifiers and bodies are filled before running write checks.</div>
+                        </div>
+                        <div class="button-row">
+                            <button class="btn" onclick="runFullDiagnostics()">Run Diagnostics</button>
+                            <button class="btn btn-small" onclick="clearDiagnostics()">Clear Results</button>
+                        </div>
+                    </div>
+                    <div class="loading" id="loading-diagnostics"></div>
+                    <div class="diagnostics-summary" id="diagnostics-summary"></div>
+                    <div class="diagnostics-list" id="diagnostics-results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081';
+        const ACTOR_ID = '11111111-2222-3333-4444-555555555555';
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Actor-Id': ACTOR_ID
+                }
+            };
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            const response = await fetch(API_BASE + endpoint, options);
+
+            if (response.status === 204) {
+                return { message: 'Success (No Content)' };
+            }
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw { status: response.status, data };
+            }
+
+            return data;
+        }
+
+        function showLoading(id, show = true) {
+            const el = document.getElementById('loading-' + id);
+            if (el) {
+                if (show) {
+                    el.textContent = 'Loading...';
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            }
+        }
+
+        function showResponse(id, data, isError = false) {
+            const el = document.getElementById('response-' + id);
+            if (el) {
+                el.textContent = JSON.stringify(data, null, 2);
+                el.className = 'response ' + (isError ? 'error' : 'success');
+            }
+        }
+
+        function getFieldValue(id) {
+            const element = document.getElementById(id);
+            if (!element) {
+                return '';
+            }
+            return (element.value || '').trim();
+        }
+
+        function getSelectValue(id) {
+            const element = document.getElementById(id);
+            if (!element) {
+                return '';
+            }
+            return element.value;
+        }
+
+        function formatPreview(data) {
+            if (data === undefined || data === null) {
+                return '';
+            }
+
+            let text;
+            if (typeof data === 'string') {
+                text = data;
+            } else {
+                try {
+                    text = JSON.stringify(data, null, 2);
+                } catch (error) {
+                    text = String(data);
+                }
+            }
+
+            if (text.length > 1800) {
+                return text.slice(0, 1800) + '\n... (truncated)';
+            }
+
+            return text;
+        }
+
+        function createDiagnosticItem(config) {
+            const item = document.createElement('div');
+            item.className = 'diagnostic-item';
+
+            const header = document.createElement('div');
+            header.className = 'diagnostic-header';
+
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = config.name;
+
+            const metaSpan = document.createElement('span');
+            metaSpan.className = 'diagnostic-meta';
+            metaSpan.textContent = `${config.method} ${config.path}`;
+
+            header.appendChild(nameSpan);
+            header.appendChild(metaSpan);
+
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'diagnostic-status';
+            statusDiv.textContent = 'Pending...';
+
+            item.appendChild(header);
+            item.appendChild(statusDiv);
+
+            return { item, statusEl: statusDiv, metaEl: metaSpan };
+        }
+
+        function setDiagnosticStatus(element, statusElement, status, message) {
+            element.classList.remove('success', 'error', 'skipped');
+            if (status) {
+                element.classList.add(status);
+            }
+
+            if (status === 'success') {
+                statusElement.textContent = `✓ ${message}`;
+                statusElement.style.color = '#047857';
+            } else if (status === 'error') {
+                statusElement.textContent = `✗ ${message}`;
+                statusElement.style.color = '#b91c1c';
+            } else if (status === 'skipped') {
+                statusElement.textContent = `⚠️ ${message}`;
+                statusElement.style.color = '#b45309';
+            } else {
+                statusElement.textContent = message;
+                statusElement.style.color = '#4a5568';
+            }
+        }
+
+        function appendDiagnosticBody(element, content) {
+            if (!content) {
+                return;
+            }
+
+            const body = document.createElement('pre');
+            body.className = 'diagnostic-body';
+            body.textContent = content;
+            element.appendChild(body);
+        }
+
+        function formatErrorMessage(error) {
+            if (!error) {
+                return 'Unknown error';
+            }
+
+            if (typeof error === 'string') {
+                return error;
+            }
+
+            if (error.status) {
+                if (error.data && typeof error.data === 'object' && error.data !== null && error.data.message) {
+                    return `HTTP ${error.status} ${error.data.message}`;
+                }
+                return `HTTP ${error.status}`;
+            }
+
+            if (error.message) {
+                return error.message;
+            }
+
+            try {
+                return JSON.stringify(error);
+            } catch (e) {
+                return 'Unknown error';
+            }
+        }
+
+        const ENDPOINT_DIAGNOSTICS = [
+            {
+                id: 'health',
+                name: 'Server Health',
+                method: 'GET',
+                path: '/actuator/health',
+                isWrite: false,
+                buildRequest: () => ({ url: '/actuator/health', useFetch: true })
+            },
+            {
+                id: 'projects-list',
+                name: 'List Projects',
+                method: 'GET',
+                path: '/api/projects',
+                isWrite: false,
+                buildRequest: () => ({ url: '/api/projects' })
+            },
+            {
+                id: 'projects-get',
+                name: 'Get Project',
+                method: 'GET',
+                path: '/api/projects/{id}',
+                isWrite: false,
+                buildRequest: () => {
+                    const id = getFieldValue('get-project-id');
+                    if (!id) {
+                        return { skip: 'Provide Project ID in Get Project card.' };
+                    }
+                    return { url: `/api/projects/${id}` };
+                }
+            },
+            {
+                id: 'projects-create',
+                name: 'Create Project',
+                method: 'POST',
+                path: '/api/projects',
+                isWrite: true,
+                buildRequest: () => {
+                    const name = getFieldValue('project-name');
+                    const ownerId = getFieldValue('project-owner-id');
+                    if (!name || !ownerId) {
+                        return { skip: 'Provide Project Name and Owner ID in Create Project card.' };
+                    }
+                    const description = document.getElementById('project-description')?.value || '';
+                    const status = getSelectValue('project-status') || 'PLANNING';
+                    return {
+                        url: '/api/projects',
+                        method: 'POST',
+                        body: { name, description, ownerId, status }
+                    };
+                }
+            },
+            {
+                id: 'projects-update',
+                name: 'Update Project',
+                method: 'PUT',
+                path: '/api/projects/{id}',
+                isWrite: true,
+                buildRequest: () => {
+                    const id = getFieldValue('update-project-id');
+                    const name = getFieldValue('update-project-name');
+                    if (!id || !name) {
+                        return { skip: 'Provide Project ID and Name in Update Project card.' };
+                    }
+                    const description = document.getElementById('update-project-description')?.value || '';
+                    return {
+                        url: `/api/projects/${id}`,
+                        method: 'PUT',
+                        body: { name, description }
+                    };
+                }
+            },
+            {
+                id: 'projects-status',
+                name: 'Update Project Status',
+                method: 'PATCH',
+                path: '/api/projects/{id}/status',
+                isWrite: true,
+                buildRequest: () => {
+                    const id = getFieldValue('project-status-id');
+                    if (!id) {
+                        return { skip: 'Provide Project ID in Update Project Status card.' };
+                    }
+                    const status = getSelectValue('project-new-status') || 'PLANNING';
+                    return {
+                        url: `/api/projects/${id}/status`,
+                        method: 'PATCH',
+                        body: { status }
+                    };
+                }
+            },
+            {
+                id: 'projects-owner',
+                name: 'Change Project Owner',
+                method: 'PATCH',
+                path: '/api/projects/{id}/owner',
+                isWrite: true,
+                buildRequest: () => {
+                    const id = getFieldValue('project-owner-change-id');
+                    const ownerId = getFieldValue('project-new-owner-id');
+                    if (!id || !ownerId) {
+                        return { skip: 'Provide Project ID and new Owner ID in Change Project Owner card.' };
+                    }
+                    return {
+                        url: `/api/projects/${id}/owner`,
+                        method: 'PATCH',
+                        body: { ownerId }
+                    };
+                }
+            },
+            {
+                id: 'tasks-list',
+                name: 'List Tasks',
+                method: 'GET',
+                path: '/api/projects/{projectId}/tasks',
+                isWrite: false,
+                buildRequest: () => {
+                    const projectId = getFieldValue('list-tasks-project-id');
+                    if (!projectId) {
+                        return { skip: 'Provide Project ID in List Tasks card.' };
+                    }
+                    return { url: `/api/projects/${projectId}/tasks` };
+                }
+            },
+            {
+                id: 'tasks-get',
+                name: 'Get Task',
+                method: 'GET',
+                path: '/api/tasks/{id}',
+                isWrite: false,
+                buildRequest: () => {
+                    const id = getFieldValue('get-task-id');
+                    if (!id) {
+                        return { skip: 'Provide Task ID in Get Task card.' };
+                    }
+                    return { url: `/api/tasks/${id}` };
+                }
+            },
+            {
+                id: 'tasks-create',
+                name: 'Create Task',
+                method: 'POST',
+                path: '/api/tasks',
+                isWrite: true,
+                buildRequest: () => {
+                    const projectId = getFieldValue('task-project-id');
+                    const title = getFieldValue('task-title');
+                    if (!projectId || !title) {
+                        return { skip: 'Provide Project ID and Title in Create Task card.' };
+                    }
+                    const description = document.getElementById('task-description')?.value || '';
+                    const priority = getSelectValue('task-priority') || 'MEDIUM';
+                    const status = getSelectValue('task-status') || 'TODO';
+                    const assigneeId = getFieldValue('task-assignee-id');
+                    const body = { projectId, title, description, priority, status };
+                    if (assigneeId) {
+                        body.assigneeId = assigneeId;
+                    }
+                    return {
+                        url: '/api/tasks',
+                        method: 'POST',
+                        body
+                    };
+                }
+            },
+            {
+                id: 'tasks-update',
+                name: 'Update Task',
+                method: 'PUT',
+                path: '/api/tasks/{id}',
+                isWrite: true,
+                buildRequest: () => {
+                    const id = getFieldValue('update-task-id');
+                    const title = getFieldValue('update-task-title');
+                    if (!id || !title) {
+                        return { skip: 'Provide Task ID and Title in Update Task card.' };
+                    }
+                    const description = document.getElementById('update-task-description')?.value || '';
+                    const priority = getSelectValue('update-task-priority') || 'MEDIUM';
+                    return {
+                        url: `/api/tasks/${id}`,
+                        method: 'PUT',
+                        body: { title, description, priority }
+                    };
+                }
+            },
+            {
+                id: 'tasks-assign',
+                name: 'Assign Task',
+                method: 'PATCH',
+                path: '/api/tasks/{id}/assignee',
+                isWrite: true,
+                buildRequest: () => {
+                    const id = getFieldValue('assign-task-id');
+                    const assigneeId = getFieldValue('assign-task-assignee-id');
+                    if (!id || !assigneeId) {
+                        return { skip: 'Provide Task ID and Assignee ID in Assign Task card.' };
+                    }
+                    return {
+                        url: `/api/tasks/${id}/assignee`,
+                        method: 'PATCH',
+                        body: { assigneeId }
+                    };
+                }
+            },
+            {
+                id: 'tasks-status',
+                name: 'Update Task Status',
+                method: 'PATCH',
+                path: '/api/tasks/{id}/status',
+                isWrite: true,
+                buildRequest: () => {
+                    const id = getFieldValue('task-status-id');
+                    if (!id) {
+                        return { skip: 'Provide Task ID in Update Task Status card.' };
+                    }
+                    const status = getSelectValue('task-new-status') || 'TODO';
+                    return {
+                        url: `/api/tasks/${id}/status`,
+                        method: 'PATCH',
+                        body: { status }
+                    };
+                }
+            },
+            {
+                id: 'tasks-attach-tag',
+                name: 'Attach Tag',
+                method: 'POST',
+                path: '/api/tasks/{taskId}/tags/{tagId}',
+                isWrite: true,
+                buildRequest: () => {
+                    const taskId = getFieldValue('attach-tag-task-id');
+                    const tagId = getFieldValue('attach-tag-id');
+                    if (!taskId || !tagId) {
+                        return { skip: 'Provide Task ID and Tag ID in Attach Tag card.' };
+                    }
+                    return {
+                        url: `/api/tasks/${taskId}/tags/${tagId}`,
+                        method: 'POST'
+                    };
+                }
+            },
+            {
+                id: 'tasks-detach-tag',
+                name: 'Detach Tag',
+                method: 'DELETE',
+                path: '/api/tasks/{taskId}/tags/{tagId}',
+                isWrite: true,
+                buildRequest: () => {
+                    const taskId = getFieldValue('detach-tag-task-id');
+                    const tagId = getFieldValue('detach-tag-id');
+                    if (!taskId || !tagId) {
+                        return { skip: 'Provide Task ID and Tag ID in Detach Tag card.' };
+                    }
+                    return {
+                        url: `/api/tasks/${taskId}/tags/${tagId}`,
+                        method: 'DELETE'
+                    };
+                }
+            },
+            {
+                id: 'comments-list',
+                name: 'List Comments',
+                method: 'GET',
+                path: '/api/tasks/{taskId}/comments',
+                isWrite: false,
+                buildRequest: () => {
+                    const taskId = getFieldValue('list-comments-task-id');
+                    if (!taskId) {
+                        return { skip: 'Provide Task ID in List Comments card.' };
+                    }
+                    return { url: `/api/tasks/${taskId}/comments` };
+                }
+            },
+            {
+                id: 'comments-create',
+                name: 'Add Comment',
+                method: 'POST',
+                path: '/api/tasks/{taskId}/comments',
+                isWrite: true,
+                buildRequest: () => {
+                    const taskId = getFieldValue('comment-task-id');
+                    const bodyText = document.getElementById('comment-body')?.value || '';
+                    if (!taskId || !bodyText.trim()) {
+                        return { skip: 'Provide Task ID and Comment text in Add Comment card.' };
+                    }
+                    return {
+                        url: `/api/tasks/${taskId}/comments`,
+                        method: 'POST',
+                        body: { body: bodyText }
+                    };
+                }
+            },
+            {
+                id: 'comments-delete',
+                name: 'Delete Comment',
+                method: 'DELETE',
+                path: '/api/tasks/{taskId}/comments/{commentId}',
+                isWrite: true,
+                buildRequest: () => {
+                    const taskId = getFieldValue('delete-comment-task-id');
+                    const commentId = getFieldValue('delete-comment-id');
+                    if (!taskId || !commentId) {
+                        return { skip: 'Provide Task ID and Comment ID in Delete Comment card.' };
+                    }
+                    return {
+                        url: `/api/tasks/${taskId}/comments/${commentId}`,
+                        method: 'DELETE'
+                    };
+                }
+            },
+            {
+                id: 'tags-list',
+                name: 'List Tags',
+                method: 'GET',
+                path: '/api/tags',
+                isWrite: false,
+                buildRequest: () => ({ url: '/api/tags' })
+            },
+            {
+                id: 'tags-create',
+                name: 'Create Tag',
+                method: 'POST',
+                path: '/api/tags',
+                isWrite: true,
+                buildRequest: () => {
+                    const name = getFieldValue('tag-name');
+                    const color = getFieldValue('tag-color');
+                    if (!name || !color) {
+                        return { skip: 'Provide Tag Name and Color in Create Tag card.' };
+                    }
+                    return {
+                        url: '/api/tags',
+                        method: 'POST',
+                        body: { name, color }
+                    };
+                }
+            },
+            {
+                id: 'users-list',
+                name: 'List Users',
+                method: 'GET',
+                path: '/api/users',
+                isWrite: false,
+                buildRequest: () => ({ url: '/api/users' })
+            },
+            {
+                id: 'users-get',
+                name: 'Get User',
+                method: 'GET',
+                path: '/api/users/{id}',
+                isWrite: false,
+                buildRequest: () => {
+                    const id = getFieldValue('get-user-id');
+                    if (!id) {
+                        return { skip: 'Provide User ID in Get User card.' };
+                    }
+                    return { url: `/api/users/${id}` };
+                }
+            },
+            {
+                id: 'activity-list',
+                name: 'Activity Log',
+                method: 'GET',
+                path: '/api/activity',
+                isWrite: false,
+                buildRequest: () => {
+                    const entityType = getSelectValue('activity-entity-type') || 'TASK';
+                    const entityId = getFieldValue('activity-entity-id');
+                    const limitValue = document.getElementById('activity-limit')?.value;
+                    const params = new URLSearchParams({ entityType });
+                    if (entityId) {
+                        params.append('entityId', entityId);
+                    }
+                    if (limitValue) {
+                        params.append('limit', limitValue);
+                    }
+                    return { url: `/api/activity?${params.toString()}` };
+                }
+            }
+        ];
+
+        async function runFullDiagnostics() {
+            const includeWrites = document.getElementById('diagnostics-include-writes')?.checked;
+            const resultsContainer = document.getElementById('diagnostics-results');
+            const summaryEl = document.getElementById('diagnostics-summary');
+            const runButton = document.querySelector('#tab-health button[onclick="runFullDiagnostics()"]');
+            const originalLabel = runButton ? runButton.textContent : '';
+
+            if (!resultsContainer || !summaryEl) {
+                return;
+            }
+
+            resultsContainer.innerHTML = '';
+            summaryEl.textContent = '';
+            showLoading('diagnostics');
+
+            if (runButton) {
+                runButton.disabled = true;
+                runButton.textContent = 'Running...';
+            }
+
+            const summary = { success: 0, error: 0, skipped: 0 };
+
+            try {
+                for (const config of ENDPOINT_DIAGNOSTICS) {
+                    const { item, statusEl, metaEl } = createDiagnosticItem(config);
+                    resultsContainer.appendChild(item);
+
+                    if (config.isWrite && !includeWrites) {
+                        setDiagnosticStatus(item, statusEl, 'skipped', 'Skipped (write operations disabled).');
+                        summary.skipped++;
+                        continue;
+                    }
+
+                    let request;
+                    try {
+                        request = config.buildRequest();
+                    } catch (builderError) {
+                        setDiagnosticStatus(item, statusEl, 'error', 'Failed to build request.');
+                        appendDiagnosticBody(item, formatPreview(builderError));
+                        summary.error++;
+                        continue;
+                    }
+
+                    if (!request || request.skip) {
+                        const reason = request?.skip || 'Skipped by configuration.';
+                        setDiagnosticStatus(item, statusEl, 'skipped', reason);
+                        summary.skipped++;
+                        continue;
+                    }
+
+                    const method = request.method || config.method || 'GET';
+                    const url = request.url || config.path;
+                    metaEl.textContent = `${method} ${url}`;
+
+                    try {
+                        let data;
+                        if (request.useFetch) {
+                            const response = await fetch(API_BASE + url, request.options || {});
+                            const contentType = response.headers.get('content-type') || '';
+                            const isJson = contentType.includes('application/json');
+                            data = isJson ? await response.json() : await response.text();
+                            if (!response.ok) {
+                                throw { status: response.status, data };
+                            }
+                        } else {
+                            data = await apiCall(url, method, request.body || null);
+                        }
+                        setDiagnosticStatus(item, statusEl, 'success', 'Success');
+                        appendDiagnosticBody(item, formatPreview(data));
+                        summary.success++;
+                    } catch (error) {
+                        const message = formatErrorMessage(error);
+                        setDiagnosticStatus(item, statusEl, 'error', message);
+                        if (error && error.data !== undefined) {
+                            appendDiagnosticBody(item, formatPreview(error.data));
+                        } else if (error && error.body !== undefined) {
+                            appendDiagnosticBody(item, formatPreview(error.body));
+                        }
+                        summary.error++;
+                    }
+                }
+            } finally {
+                showLoading('diagnostics', false);
+                summaryEl.textContent = `✓ ${summary.success} passed • ⚠️ ${summary.skipped} skipped • ✗ ${summary.error} failed`;
+                if (runButton) {
+                    runButton.disabled = false;
+                    runButton.textContent = originalLabel || 'Run Diagnostics';
+                }
+            }
+        }
+
+        function clearDiagnostics() {
+            const resultsContainer = document.getElementById('diagnostics-results');
+            const summaryEl = document.getElementById('diagnostics-summary');
+            if (resultsContainer) {
+                resultsContainer.innerHTML = '';
+            }
+            if (summaryEl) {
+                summaryEl.textContent = '';
+            }
+            showLoading('diagnostics', false);
+        }
+
+        // Project functions
+        async function createProject() {
+            const name = document.getElementById('project-name').value;
+            const description = document.getElementById('project-description').value;
+            const ownerId = document.getElementById('project-owner-id').value;
+            const status = document.getElementById('project-status').value;
+
+            if (!name || !ownerId) {
+                showResponse('create-project', { error: 'Name and Owner ID are required' }, true);
+                return;
+            }
+
+            showLoading('create-project');
+            try {
+                const data = await apiCall('/api/projects', 'POST', { name, description, ownerId, status });
+                showResponse('create-project', data);
+                document.getElementById('project-name').value = '';
+                document.getElementById('project-description').value = '';
+            } catch (error) {
+                showResponse('create-project', error, true);
+            } finally {
+                showLoading('create-project', false);
+            }
+        }
+
+        async function listProjects() {
+            showLoading('projects');
+            try {
+                const data = await apiCall('/api/projects');
+                showResponse('projects', data);
+            } catch (error) {
+                showResponse('projects', error, true);
+            } finally {
+                showLoading('projects', false);
+            }
+        }
+
+        async function getProject() {
+            const id = document.getElementById('get-project-id').value;
+            if (!id) {
+                showResponse('get-project', { error: 'Project ID is required' }, true);
+                return;
+            }
+
+            showLoading('get-project');
+            try {
+                const data = await apiCall(`/api/projects/${id}`);
+                showResponse('get-project', data);
+            } catch (error) {
+                showResponse('get-project', error, true);
+            } finally {
+                showLoading('get-project', false);
+            }
+        }
+
+        async function updateProject() {
+            const id = document.getElementById('update-project-id').value;
+            const name = document.getElementById('update-project-name').value;
+            const description = document.getElementById('update-project-description').value;
+
+            if (!id || !name) {
+                showResponse('update-project', { error: 'Project ID and Name are required' }, true);
+                return;
+            }
+
+            showLoading('update-project');
+            try {
+                const data = await apiCall(`/api/projects/${id}`, 'PUT', { name, description });
+                showResponse('update-project', data);
+            } catch (error) {
+                showResponse('update-project', error, true);
+            } finally {
+                showLoading('update-project', false);
+            }
+        }
+
+        async function updateProjectStatus() {
+            const id = document.getElementById('project-status-id').value;
+            const status = document.getElementById('project-new-status').value;
+
+            if (!id) {
+                showResponse('project-status', { error: 'Project ID is required' }, true);
+                return;
+            }
+
+            showLoading('project-status');
+            try {
+                const data = await apiCall(`/api/projects/${id}/status`, 'PATCH', { status });
+                showResponse('project-status', data);
+            } catch (error) {
+                showResponse('project-status', error, true);
+            } finally {
+                showLoading('project-status', false);
+            }
+        }
+
+        async function changeProjectOwner() {
+            const id = document.getElementById('project-owner-change-id').value;
+            const ownerId = document.getElementById('project-new-owner-id').value;
+
+            if (!id || !ownerId) {
+                showResponse('project-owner', { error: 'Project ID and Owner ID are required' }, true);
+                return;
+            }
+
+            showLoading('project-owner');
+            try {
+                const data = await apiCall(`/api/projects/${id}/owner`, 'PATCH', { ownerId });
+                showResponse('project-owner', data);
+            } catch (error) {
+                showResponse('project-owner', error, true);
+            } finally {
+                showLoading('project-owner', false);
+            }
+        }
+
+        // Task functions
+        async function createTask() {
+            const projectId = document.getElementById('task-project-id').value;
+            const title = document.getElementById('task-title').value;
+            const description = document.getElementById('task-description').value;
+            const priority = document.getElementById('task-priority').value;
+            const status = document.getElementById('task-status').value;
+            const assigneeId = document.getElementById('task-assignee-id').value;
+
+            if (!projectId || !title) {
+                showResponse('create-task', { error: 'Project ID and Title are required' }, true);
+                return;
+            }
+
+            showLoading('create-task');
+            try {
+                const body = { projectId, title, description, priority, status };
+                if (assigneeId) body.assigneeId = assigneeId;
+
+                const data = await apiCall('/api/tasks', 'POST', body);
+                showResponse('create-task', data);
+                document.getElementById('task-title').value = '';
+                document.getElementById('task-description').value = '';
+            } catch (error) {
+                showResponse('create-task', error, true);
+            } finally {
+                showLoading('create-task', false);
+            }
+        }
+
+        async function listTasks() {
+            const projectId = document.getElementById('list-tasks-project-id').value;
+            if (!projectId) {
+                showResponse('tasks', { error: 'Project ID is required' }, true);
+                return;
+            }
+
+            showLoading('tasks');
+            try {
+                const data = await apiCall(`/api/tasks?projectId=${projectId}`);
+                showResponse('tasks', data);
+            } catch (error) {
+                showResponse('tasks', error, true);
+            } finally {
+                showLoading('tasks', false);
+            }
+        }
+
+        async function getTask() {
+            const id = document.getElementById('get-task-id').value;
+            if (!id) {
+                showResponse('get-task', { error: 'Task ID is required' }, true);
+                return;
+            }
+
+            showLoading('get-task');
+            try {
+                const data = await apiCall(`/api/tasks/${id}`);
+                showResponse('get-task', data);
+            } catch (error) {
+                showResponse('get-task', error, true);
+            } finally {
+                showLoading('get-task', false);
+            }
+        }
+
+        async function updateTask() {
+            const id = document.getElementById('update-task-id').value;
+            const title = document.getElementById('update-task-title').value;
+            const description = document.getElementById('update-task-description').value;
+            const priority = document.getElementById('update-task-priority').value;
+
+            if (!id || !title) {
+                showResponse('update-task', { error: 'Task ID and Title are required' }, true);
+                return;
+            }
+
+            showLoading('update-task');
+            try {
+                const data = await apiCall(`/api/tasks/${id}`, 'PUT', { title, description, priority });
+                showResponse('update-task', data);
+            } catch (error) {
+                showResponse('update-task', error, true);
+            } finally {
+                showLoading('update-task', false);
+            }
+        }
+
+        async function assignTask() {
+            const id = document.getElementById('assign-task-id').value;
+            const assigneeId = document.getElementById('assign-task-assignee-id').value;
+
+            if (!id || !assigneeId) {
+                showResponse('assign-task', { error: 'Task ID and Assignee ID are required' }, true);
+                return;
+            }
+
+            showLoading('assign-task');
+            try {
+                const data = await apiCall(`/api/tasks/${id}/assignee`, 'PATCH', { assigneeId });
+                showResponse('assign-task', data);
+            } catch (error) {
+                showResponse('assign-task', error, true);
+            } finally {
+                showLoading('assign-task', false);
+            }
+        }
+
+        async function updateTaskStatus() {
+            const id = document.getElementById('task-status-id').value;
+            const status = document.getElementById('task-new-status').value;
+
+            if (!id) {
+                showResponse('task-status', { error: 'Task ID is required' }, true);
+                return;
+            }
+
+            showLoading('task-status');
+            try {
+                const data = await apiCall(`/api/tasks/${id}/status`, 'PATCH', { status });
+                showResponse('task-status', data);
+            } catch (error) {
+                showResponse('task-status', error, true);
+            } finally {
+                showLoading('task-status', false);
+            }
+        }
+
+        async function attachTag() {
+            const taskId = document.getElementById('attach-tag-task-id').value;
+            const tagId = document.getElementById('attach-tag-id').value;
+
+            if (!taskId || !tagId) {
+                showResponse('attach-tag', { error: 'Task ID and Tag ID are required' }, true);
+                return;
+            }
+
+            showLoading('attach-tag');
+            try {
+                const data = await apiCall(`/api/tasks/${taskId}/tags/${tagId}`, 'POST');
+                showResponse('attach-tag', data);
+            } catch (error) {
+                showResponse('attach-tag', error, true);
+            } finally {
+                showLoading('attach-tag', false);
+            }
+        }
+
+        async function detachTag() {
+            const taskId = document.getElementById('detach-tag-task-id').value;
+            const tagId = document.getElementById('detach-tag-id').value;
+
+            if (!taskId || !tagId) {
+                showResponse('detach-tag', { error: 'Task ID and Tag ID are required' }, true);
+                return;
+            }
+
+            showLoading('detach-tag');
+            try {
+                const data = await apiCall(`/api/tasks/${taskId}/tags/${tagId}`, 'DELETE');
+                showResponse('detach-tag', data);
+            } catch (error) {
+                showResponse('detach-tag', error, true);
+            } finally {
+                showLoading('detach-tag', false);
+            }
+        }
+
+        // Comment functions
+        async function createComment() {
+            const taskId = document.getElementById('comment-task-id').value;
+            const body = document.getElementById('comment-body').value;
+
+            if (!taskId || !body) {
+                showResponse('create-comment', { error: 'Task ID and Comment are required' }, true);
+                return;
+            }
+
+            showLoading('create-comment');
+            try {
+                const data = await apiCall(`/api/tasks/${taskId}/comments`, 'POST', { body });
+                showResponse('create-comment', data);
+                document.getElementById('comment-body').value = '';
+            } catch (error) {
+                showResponse('create-comment', error, true);
+            } finally {
+                showLoading('create-comment', false);
+            }
+        }
+
+        async function listComments() {
+            const taskId = document.getElementById('list-comments-task-id').value;
+            if (!taskId) {
+                showResponse('comments', { error: 'Task ID is required' }, true);
+                return;
+            }
+
+            showLoading('comments');
+            try {
+                const data = await apiCall(`/api/tasks/${taskId}/comments`);
+                showResponse('comments', data);
+            } catch (error) {
+                showResponse('comments', error, true);
+            } finally {
+                showLoading('comments', false);
+            }
+        }
+
+        async function deleteComment() {
+            const taskId = document.getElementById('delete-comment-task-id').value;
+            const commentId = document.getElementById('delete-comment-id').value;
+
+            if (!taskId || !commentId) {
+                showResponse('delete-comment', { error: 'Task ID and Comment ID are required' }, true);
+                return;
+            }
+
+            showLoading('delete-comment');
+            try {
+                const data = await apiCall(`/api/tasks/${taskId}/comments/${commentId}`, 'DELETE');
+                showResponse('delete-comment', data);
+            } catch (error) {
+                showResponse('delete-comment', error, true);
+            } finally {
+                showLoading('delete-comment', false);
+            }
+        }
+
+        // Tag functions
+        async function createTag() {
+            const name = document.getElementById('tag-name').value;
+            const color = document.getElementById('tag-color').value;
+
+            if (!name || !color) {
+                showResponse('create-tag', { error: 'Please fill in all fields' }, true);
+                return;
+            }
+
+            showLoading('create-tag');
+            try {
+                const data = await apiCall('/api/tags', 'POST', { name, color });
+                showResponse('create-tag', data);
+                document.getElementById('tag-name').value = '';
+                listTags();
+            } catch (error) {
+                showResponse('create-tag', error, true);
+            } finally {
+                showLoading('create-tag', false);
+            }
+        }
+
+        async function listTags() {
+            showLoading('tags');
+            try {
+                const data = await apiCall('/api/tags');
+                showResponse('tags', data);
+            } catch (error) {
+                showResponse('tags', error, true);
+            } finally {
+                showLoading('tags', false);
+            }
+        }
+
+        // User functions
+        async function listUsers() {
+            showLoading('users');
+            try {
+                const data = await apiCall('/api/users');
+                showResponse('users', data);
+            } catch (error) {
+                showResponse('users', error, true);
+            } finally {
+                showLoading('users', false);
+            }
+        }
+
+        async function getUser() {
+            const id = document.getElementById('get-user-id').value;
+            if (!id) {
+                showResponse('get-user', { error: 'User ID is required' }, true);
+                return;
+            }
+
+            showLoading('get-user');
+            try {
+                const data = await apiCall(`/api/users/${id}`);
+                showResponse('get-user', data);
+            } catch (error) {
+                showResponse('get-user', error, true);
+            } finally {
+                showLoading('get-user', false);
+            }
+        }
+
+        // Activity function
+        async function listActivity() {
+            const entityType = document.getElementById('activity-entity-type').value;
+            const entityId = document.getElementById('activity-entity-id').value;
+            const limit = document.getElementById('activity-limit').value;
+
+            let endpoint = `/api/activity?entityType=${entityType}`;
+            if (entityId) endpoint += `&entityId=${entityId}`;
+            if (limit) endpoint += `&limit=${limit}`;
+
+            showLoading('activity');
+            try {
+                const data = await apiCall(endpoint);
+                showResponse('activity', data);
+            } catch (error) {
+                showResponse('activity', error, true);
+            } finally {
+                showLoading('activity', false);
+            }
+        }
+
+        // Health function
+        async function checkHealth() {
+            showLoading('health');
+            try {
+                const response = await fetch(API_BASE + '/actuator/health');
+                const data = await response.json();
+                showResponse('health', data);
+                updateStatus(data.status === 'UP');
+            } catch (error) {
+                showResponse('health', { error: error.message }, true);
+                updateStatus(false);
+            } finally {
+                showLoading('health', false);
+            }
+        }
+
+        function updateStatus(isUp) {
+            const statusEl = document.getElementById('status');
+            if (isUp) {
+                statusEl.textContent = '✓ Server Running';
+                statusEl.style.background = '#10b981';
+            } else {
+                statusEl.textContent = '✗ Server Down';
+                statusEl.style.background = '#ef4444';
+            }
+        }
+
+        checkHealth();
+    </script>
+</body>
+</html>
