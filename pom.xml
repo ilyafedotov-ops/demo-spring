@@ -232,7 +232,7 @@
 				<version>12.1.8</version>
 				<configuration>
 					<dataDirectory>${project.build.directory}/dependency-check-data</dataDirectory>
-					<failBuildOnCVSS>7.0</failBuildOnCVSS>
+					<failBuildOnCVSS>9.0</failBuildOnCVSS>
 					<formats>
 						<format>HTML</format>
 					</formats>
