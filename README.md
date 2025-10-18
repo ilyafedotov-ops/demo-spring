@@ -164,7 +164,9 @@ Need a realistic dataset for demos or manual testing? A Python helper script can
    The script records created resource IDs in `.taskify-seed-state.json` and prints a summary.
 4. **Cleanup later** (optional):
    ```bash
-   python3 scripts/sample_data_generator.py --run cleanup
+   python3 scripts/sample_data_generator.py \
+     --actor-id 11111111-2222-3333-4444-555555555555 \
+     --run cleanup
    ```
    Cleanup relies solely on REST endpoints: comments deleted, tag attachments removed, tasks/projects transitioned to `CANCELLED`.
 

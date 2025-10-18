@@ -184,7 +184,7 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> SeedConfig:
             """
             Examples:
               python3 scripts/sample_data_generator.py --actor-id <uuid> --owner-ids <uuid>,<uuid> --run create
-              python3 scripts/sample_data_generator.py --run cleanup
+              python3 scripts/sample_data_generator.py --actor-id <uuid> --run cleanup
             """
         ),
     )
@@ -201,8 +201,8 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> SeedConfig:
 
     args = parser.parse_args(argv)
 
-    if args.run != "cleanup" and not args.actor_id:
-        parser.error("--actor-id is required for create operations")
+    if not args.actor_id and not args.dry_run:
+        parser.error("--actor-id is required unless --dry-run is set (API needs authentication)")
 
     owner_ids = split_csv(args.owner_ids)
     assignee_ids = split_csv(args.assignee_ids) if args.assignee_ids else owner_ids.copy()
